@@ -13,18 +13,18 @@ namespace SassTypes
   }
 
   napi_value Null::construct_and_wrap_instance(napi_env env, napi_value ctor, Null* n) {
-      Napi::EscapableHandleScope scope;
+      Napi::EscapableHandleScope scope(env);
 
       napi_value instance;
       CHECK_NAPI_RESULT(napi_new_instance(env, ctor, 0, nullptr, &instance));
-      CHECK_NAPI_RESULT(napi_wrap(env, instance, n, nullptr, nullptr));
+      CHECK_NAPI_RESULT(napi_wrap(env, instance, n, nullptr, nullptr, nullptr));
       CHECK_NAPI_RESULT(napi_create_reference(env, instance, 1, &(n->js_object)));
 
       return scope.Escape(instance);
   }
 
   napi_value Null::get_constructor(napi_env env) {
-    Napi::EscapableHandleScope scope;
+    Napi::EscapableHandleScope scope(env);
     napi_value ctor;
 
     if (Null::constructor) {
@@ -36,9 +36,7 @@ namespace SassTypes
       Null& singleton = get_singleton();
       napi_value instance = construct_and_wrap_instance(env, ctor, &singleton);
 
-      napi_propertyname nullName;
-      CHECK_NAPI_RESULT(napi_property_name(env, "NULL", &nullName));
-      CHECK_NAPI_RESULT(napi_set_property(env, ctor, nullName, instance));
+      CHECK_NAPI_RESULT(napi_set_named_property(env, ctor, "NULL", instance));
 
       constructor_locked = true;
     }
@@ -56,7 +54,7 @@ namespace SassTypes
     return v;
   }
 
-  NAPI_METHOD(Null::New) {
+  void Null::New(napi_env env, napi_callback_info info) {
     bool r;
     CHECK_NAPI_RESULT(napi_is_construct_call(env, info, &r));
 

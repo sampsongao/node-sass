@@ -13,18 +13,18 @@ namespace SassTypes
   }
 
   napi_value Boolean::construct_and_wrap_instance(napi_env env, napi_value ctor, Boolean* b) {
-    Napi::EscapableHandleScope scope;
+    Napi::EscapableHandleScope scope(env);
 
     napi_value instance;
     CHECK_NAPI_RESULT(napi_new_instance(env, ctor, 0, nullptr, &instance));
-    CHECK_NAPI_RESULT(napi_wrap(env, instance, b, nullptr, nullptr));
+    CHECK_NAPI_RESULT(napi_wrap(env, instance, b, nullptr, nullptr, nullptr));
     CHECK_NAPI_RESULT(napi_create_reference(env, instance, 1, &(b->js_object)));
 
     return scope.Escape(instance);
   }
 
   napi_value Boolean::get_constructor(napi_env env) {
-    Napi::EscapableHandleScope scope;
+    Napi::EscapableHandleScope scope(env);
     napi_value ctor;
 
     if (Boolean::constructor) {
@@ -39,17 +39,11 @@ namespace SassTypes
 
       Boolean& falseSingleton = get_singleton(false);
       napi_value instance = construct_and_wrap_instance(env, ctor, &falseSingleton);
-
-      napi_propertyname falseName;
-      CHECK_NAPI_RESULT(napi_property_name(env, "FALSE", &falseName));
-      CHECK_NAPI_RESULT(napi_set_property(env, ctor, falseName, instance));
+      CHECK_NAPI_RESULT(napi_set_named_property(env, ctor, "FALSE", instance));
 
       Boolean& trueSingleton = get_singleton(true);
       instance = construct_and_wrap_instance(env, ctor, &trueSingleton);
-
-      napi_propertyname trueName;
-      CHECK_NAPI_RESULT(napi_property_name(env, "TRUE", &trueName));
-      CHECK_NAPI_RESULT(napi_set_property(env, ctor, trueName, instance));
+      CHECK_NAPI_RESULT(napi_set_named_property(env, ctor, "TRUE", instance));
 
       constructor_locked = true;
     }
@@ -62,13 +56,13 @@ namespace SassTypes
   }
 
   napi_value Boolean::get_js_object(napi_env env) {
-    Napi::EscapableHandleScope scope;
+    Napi::EscapableHandleScope scope(env);
     napi_value v;
     CHECK_NAPI_RESULT(napi_get_reference_value(env, this->js_object, &v));
     return scope.Escape(v);
   }
 
-  NAPI_METHOD(Boolean::New) {
+  void Boolean::New(napi_env env, napi_callback_info info) {
     bool r;
     CHECK_NAPI_RESULT(napi_is_construct_call(env, info, &r));
 
@@ -102,7 +96,7 @@ namespace SassTypes
     }
   }
 
-  NAPI_METHOD(Boolean::GetValue) {
+  void Boolean::GetValue(napi_env env, napi_callback_info info) {
     napi_value _this;
     CHECK_NAPI_RESULT(napi_get_cb_this(env, info, &_this));
 

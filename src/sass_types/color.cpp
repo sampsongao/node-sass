@@ -77,35 +77,35 @@ namespace SassTypes
     return ctor;
   }
 
-  NAPI_METHOD(Color::GetR) {
+  void Color::GetR(napi_env env, napi_callback_info info) {
     CommonGetNumber(env, info, sass_color_get_r);
   }
 
-  NAPI_METHOD(Color::GetG) {
+  void Color::GetG(napi_env env, napi_callback_info info) {
     CommonGetNumber(env, info, sass_color_get_g);
   }
 
-  NAPI_METHOD(Color::GetB) {
+  void Color::GetB(napi_env env, napi_callback_info info) {
     CommonGetNumber(env, info, sass_color_get_b);
   }
 
-  NAPI_METHOD(Color::GetA) {
+  void Color::GetA(napi_env env, napi_callback_info info) {
     CommonGetNumber(env, info, sass_color_get_a);
   }
 
-  NAPI_METHOD(Color::SetR) {
+  void Color::SetR(napi_env env, napi_callback_info info) {
     CommonSetNumber(env, info, sass_color_set_r);
   }
 
-  NAPI_METHOD(Color::SetG) {
+  void Color::SetG(napi_env env, napi_callback_info info) {
     CommonSetNumber(env, info, sass_color_set_g);
   }
 
-  NAPI_METHOD(Color::SetB) {
+  void Color::SetB(napi_env env, napi_callback_info info) {
     CommonSetNumber(env, info, sass_color_set_b);
   }
 
-  NAPI_METHOD(Color::SetA) {
+  void Color::SetA(napi_env env, napi_callback_info info) {
     CommonSetNumber(env, info, sass_color_set_a);
   }
 }

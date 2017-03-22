@@ -5,8 +5,7 @@
 #include <vector>
 #include "value.h"
 #include "factory.h"
-#include <node_api_helpers.h>
-#include <node_jsvmapi_types.h>
+#include <napi.h>
 
 namespace SassTypes
 {
@@ -24,7 +23,7 @@ namespace SassTypes
       napi_value get_js_object(napi_env);
 
       static napi_value get_constructor(napi_env);
-      static NAPI_METHOD(New);
+      static void New(napi_env env, napi_callback_info info);
       static Sass_Value *fail(const char *, Sass_Value **);
 
     protected:
@@ -217,7 +216,7 @@ namespace SassTypes
         setfnc(unwrap(env, _this)->value, v, sass_value->get_sass_value());
     }
     else {
-      CHECK_NAPI_RESULT(napi_throw_type_error(env, "A SassValue is expected as the list item"));
+      CHECK_NAPI_RESULT(napi_throw_type_error(env, "A SassValue is expected"));
     }
   }
 
@@ -235,7 +234,7 @@ namespace SassTypes
       void* wrapped;
       CHECK_NAPI_RESULT(napi_unwrap(env, wrapper, &wrapped));
       delete static_cast<T*>(wrapped);
-      CHECK_NAPI_RESULT(napi_wrap(env, wrapper, this, nullptr, nullptr));
+      CHECK_NAPI_RESULT(napi_wrap(env, wrapper, this, nullptr, nullptr, nullptr));
       CHECK_NAPI_RESULT(napi_create_reference(env, wrapper, 1, &this->js_object));
     }
 
@@ -246,7 +245,7 @@ namespace SassTypes
 
   template <class T>
   napi_value SassValueWrapper<T>::get_constructor(napi_env env) {
-    Napi::EscapableHandleScope scope;
+    Napi::EscapableHandleScope scope(env);
 
     napi_value ctor;
     if (!constructor) {
@@ -261,7 +260,7 @@ namespace SassTypes
   }
 
   template <class T>
-  NAPI_METHOD(SassValueWrapper<T>::New) {
+  void SassValueWrapper<T>::New(napi_env env, napi_callback_info info) {
     int argsLength;
     CHECK_NAPI_RESULT(napi_get_cb_args_length(env, info, &argsLength));
     std::vector<napi_value> localArgs(argsLength);
@@ -284,7 +283,7 @@ namespace SassTypes
 
         napi_value _this;
         CHECK_NAPI_RESULT(napi_get_cb_this(env, info, &_this));
-        CHECK_NAPI_RESULT(napi_wrap(env, _this, obj, nullptr, nullptr));
+        CHECK_NAPI_RESULT(napi_wrap(env, _this, obj, nullptr, nullptr, nullptr));
         CHECK_NAPI_RESULT(napi_create_reference(env, _this, 1, &obj->js_object));
       } else {
         CHECK_NAPI_RESULT(napi_throw_error(env, sass_error_get_message(value)));

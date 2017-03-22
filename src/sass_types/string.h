@@ -13,8 +13,8 @@ namespace SassTypes
       static Sass_Value* construct(napi_env, const std::vector<napi_value>, Sass_Value **);
       static napi_value getConstructor(napi_env, napi_callback);
 
-      static NAPI_METHOD(GetValue);
-      static NAPI_METHOD(SetValue);
+      static void GetValue(napi_env env, napi_callback_info info);
+      static void SetValue(napi_env env, napi_callback_info info);
   };
 }
 

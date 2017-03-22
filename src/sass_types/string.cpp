@@ -33,11 +33,11 @@ namespace SassTypes
     return ctor;
   }
 
-  NAPI_METHOD(String::GetValue) {
+  void String::GetValue(napi_env env, napi_callback_info info) {
     CommonGetString(env, info, sass_string_get_value);
   }
 
-  NAPI_METHOD(String::SetValue) {
+  void String::SetValue(napi_env env, napi_callback_info info) {
     CommonSetString(env, info, sass_string_set_value);
   }
 }

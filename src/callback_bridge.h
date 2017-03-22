@@ -4,8 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <uv.h>
-#include <node_jsvmapi_types.h>
-#include <node_api_helpers.h>
+#include <napi.h>
 #include "common.h"
 
 template <typename T, typename L = void*>
@@ -57,7 +56,7 @@ template <typename T, typename L>
 napi_ref CallbackBridge<T, L>::wrapper_constructor = nullptr;
 
 template <typename T, typename L>
-void CallbackBridge_Destructor(void* obj) {
+void CallbackBridge_Destructor(void* obj, void* hint) {
   CallbackBridge<T, L>* bridge = static_cast<CallbackBridge<T, L>*>(obj);
   delete bridge;
 }
@@ -98,7 +97,7 @@ CallbackBridge<T, L>::CallbackBridge(napi_env env, napi_value callback, bool is_
   CHECK_NAPI_RESULT(napi_create_reference(env, callback, 1, &this->callback));
 
   napi_value instance = CallbackBridge::NewInstance(env);
-  CHECK_NAPI_RESULT(napi_wrap(env, instance, this, CallbackBridge_Destructor<T,L>, nullptr));
+  CHECK_NAPI_RESULT(napi_wrap(env, instance, this, CallbackBridge_Destructor<T,L>, nullptr, nullptr));
   CHECK_NAPI_RESULT(napi_create_reference(env, instance, 1, &this->wrapper));
 }
 
@@ -127,7 +126,7 @@ T CallbackBridge<T, L>::operator()(std::vector<void*> argv) {
      * from types invoked by pre_process_args() and
      * post_process_args().
      */
-    Napi::HandleScope scope;
+    Napi::HandleScope scope(this->e);
 
     std::vector<napi_value> argv_v8 = pre_process_args(this->e, argv);
 
@@ -194,7 +193,7 @@ void CallbackBridge<T, L>::dispatched_async_uv_callback(uv_async_t *req) {
    * from types invoked by pre_process_args() and
    * post_process_args().
    */
-  Napi::HandleScope scope;
+  Napi::HandleScope scope(bridge->e);
   std::vector<napi_value> argv_v8 = bridge->pre_process_args(bridge->e, bridge->argv);
   bool isPending;
 

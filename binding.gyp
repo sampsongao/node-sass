@@ -36,7 +36,7 @@
         'MACOSX_DEPLOYMENT_TARGET': '10.7'
       },
       'include_dirs': [
-        '<!(node -e "require(\'nan\')")',
+        "<!(node -p \"require('node-api').include\")"
       ],
       'conditions': [
         ['libsass_ext == "" or libsass_ext == "no"', {

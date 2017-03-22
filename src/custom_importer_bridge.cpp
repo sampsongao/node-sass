@@ -4,12 +4,14 @@
 
 SassImportList CustomImporterBridge::post_process_return_value(napi_env env, napi_value returned_value) const {
   SassImportList imports = 0;
-  Napi::HandleScope scope;
+  Napi::HandleScope scope(env);
 
-  bool r;
-  CHECK_NAPI_RESULT(napi_is_array(env, returned_value, &r));
+  bool isArray;
+  bool isError;
+  CHECK_NAPI_RESULT(napi_is_array(env, returned_value, &isArray));
+  CHECK_NAPI_RESULT(napi_is_error(env, returned_value, &isError));
 
-  if (r) {
+  if (isArray) {
     uint32_t length;
     CHECK_NAPI_RESULT(napi_get_array_length(env, returned_value, &length));
 
@@ -28,12 +30,11 @@ SassImportList CustomImporterBridge::post_process_return_value(napi_env env, nap
         continue;
       }
 
-      // TODO: IsNativeError
-      if (false) {
-        napi_propertyname nameMessage;
-        CHECK_NAPI_RESULT(napi_property_name(env, "message", &nameMessage));
+      CHECK_NAPI_RESULT(napi_is_error(env, value, &isError));
+
+      if (isError) {
         napi_value propertyMessage;
-        CHECK_NAPI_RESULT(napi_get_property(env, value, nameMessage, &propertyMessage));
+        CHECK_NAPI_RESULT(napi_get_named_property(env, value, "message", &propertyMessage));
 
         char* message = create_string(env, propertyMessage);
         imports[i] = sass_make_import_entry(0, 0, 0);
@@ -42,14 +43,11 @@ SassImportList CustomImporterBridge::post_process_return_value(napi_env env, nap
         imports[i] = get_importer_entry(env, value);
       }
     }
-  } else if (false) {
-    // TODO: IsNativeError
+  } else if (isError) {
     imports = sass_make_import_list(1);
 
-    napi_propertyname nameMessage;
-    CHECK_NAPI_RESULT(napi_property_name(env, "message", &nameMessage));
     napi_value propertyMessage;
-    CHECK_NAPI_RESULT(napi_get_property(env, returned_value, nameMessage, &propertyMessage));
+    CHECK_NAPI_RESULT(napi_get_named_property(env, returned_value, "message", &propertyMessage));
 
     char* message = create_string(env, propertyMessage);
     imports[0] = sass_make_import_entry(0, 0, 0);
@@ -84,18 +82,12 @@ err:
 }
 
 Sass_Import* CustomImporterBridge::get_importer_entry(napi_env env, const napi_value& object) const {
-  napi_propertyname nameFile;
-  CHECK_NAPI_RESULT(napi_property_name(env, "file", &nameFile));
-  napi_propertyname nameContents;
-  CHECK_NAPI_RESULT(napi_property_name(env, "contents", &nameContents));
-  napi_propertyname nameMap;
-  CHECK_NAPI_RESULT(napi_property_name(env, "map", &nameMap));
   napi_value returned_file;
-  CHECK_NAPI_RESULT(napi_get_property(env, object, nameFile, &returned_file));
+  CHECK_NAPI_RESULT(napi_get_named_property(env, object, "file", &returned_file));
   napi_value returned_contents;
-  CHECK_NAPI_RESULT(napi_get_property(env, object, nameContents, &returned_contents));
+  CHECK_NAPI_RESULT(napi_get_named_property(env, object, "contents", &returned_contents));
   napi_value returned_map;
-  CHECK_NAPI_RESULT(napi_get_property(env, object, nameMap, &returned_map));
+  CHECK_NAPI_RESULT(napi_get_named_property(env, object, "map", &returned_map));
 
   Sass_Import *err;
 

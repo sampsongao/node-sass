@@ -3,7 +3,7 @@
 
 #include <sass/values.h>
 #include "..\common.h"
-#include <node_jsvmapi_types.h>
+#include <napi.h>
 
 namespace SassTypes
 {

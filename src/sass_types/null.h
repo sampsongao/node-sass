@@ -6,7 +6,7 @@
 // node-sass only builds with MSVC 2013 which doesn't appear to have char16_t defined
 #define char16_t wchar_t
 
-#include <node_api_helpers.h>
+#include <napi.h>
 
 namespace SassTypes
 {
@@ -18,7 +18,7 @@ namespace SassTypes
       Sass_Value* get_sass_value();
       napi_value get_js_object(napi_env env);
 
-      static NAPI_METHOD(New);
+      static void New(napi_env env, napi_callback_info info);
 
     private:
       Null();

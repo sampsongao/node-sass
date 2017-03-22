@@ -47,15 +47,15 @@ namespace SassTypes
     return ctor;
   }
 
-  NAPI_METHOD(List::GetValue) {
+  void List::GetValue(napi_env env, napi_callback_info info) {
     CommonGetIndexedValue(env, info, sass_list_get_length, sass_list_get_value);
   }
 
-  NAPI_METHOD(List::SetValue) {
+  void List::SetValue(napi_env env, napi_callback_info info) {
     CommonSetIndexedValue(env, info, sass_list_set_value);
   }
 
-  NAPI_METHOD(List::GetSeparator) {
+  void List::GetSeparator(napi_env env, napi_callback_info info) {
     napi_value _this;
     CHECK_NAPI_RESULT(napi_get_cb_this(env, info, &_this));
 
@@ -65,7 +65,7 @@ namespace SassTypes
     CHECK_NAPI_RESULT(napi_set_return_value(env, info, ret));
   }
 
-  NAPI_METHOD(List::SetSeparator) {
+  void List::SetSeparator(napi_env env, napi_callback_info info) {
     int argLength;
     CHECK_NAPI_RESULT(napi_get_cb_args_length(env, info, &argLength));
 
@@ -93,7 +93,7 @@ namespace SassTypes
     sass_list_set_separator(unwrap(env, _this)->value, b ? SASS_COMMA : SASS_SPACE);
   }
 
-  NAPI_METHOD(List::GetLength) {
+  void List::GetLength(napi_env env, napi_callback_info info) {
     napi_value _this;
     CHECK_NAPI_RESULT(napi_get_cb_this(env, info, &_this));
 

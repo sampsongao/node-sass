@@ -3,7 +3,7 @@
 
 #include "value.h"
 #include "sass_value_wrapper.h"
-#include <node_api_helpers.h>
+#include <napi.h>
 
 namespace SassTypes
 {
@@ -15,8 +15,8 @@ namespace SassTypes
       Sass_Value* get_sass_value();
       napi_value get_js_object(napi_env env);
 
-      static NAPI_METHOD(New);
-      static NAPI_METHOD(GetValue);
+      static void New(napi_env env, napi_callback_info info);
+      static void GetValue(napi_env env, napi_callback_info info);
 
     private:
       Boolean(bool);

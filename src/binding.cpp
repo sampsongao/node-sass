@@ -1,5 +1,5 @@
 ﻿#include <vector>
-#include <node_api_helpers.h>
+#include <napi.h>
 #include "sass_context_wrapper.h"
 #include "custom_function_bridge.h"
 #include "create_string.h"
@@ -25,7 +25,7 @@ union Sass_Value* sass_custom_function(const union Sass_Value* s_args, Sass_Func
   CustomFunctionBridge& bridge = *(static_cast<CustomFunctionBridge*>(cookie));
 
   std::vector<void*> argv;
-  for (unsigned l = sass_list_get_length(s_args), i = 0; i < l; i++) {
+  for (size_t l = sass_list_get_length(s_args), i = 0; i < l; i++) {
     argv.push_back((void*)sass_list_get_value(s_args, i));
   }
 
@@ -34,14 +34,12 @@ union Sass_Value* sass_custom_function(const union Sass_Value* s_args, Sass_Func
 
 int ExtractOptions(napi_env e, napi_value options, void* cptr, sass_context_wrapper* ctx_w, bool is_file, bool is_sync) {
   // TODO: Enable napi_close_handle_scope during a pending exception state.
-  //Napi::HandleScope scope;
+  //Napi::HandleScope scope(e);
 
   struct Sass_Context* ctx;
 
-  napi_propertyname nameResult;
-  CHECK_NAPI_RESULT(napi_property_name(e, "result", &nameResult));
   napi_value result_;
-  CHECK_NAPI_RESULT(napi_get_property(e, options, nameResult, &result_));
+  CHECK_NAPI_RESULT(napi_get_named_property(e, options, "result", &result_));
   napi_valuetype t;
   CHECK_NAPI_RESULT(napi_get_type_of_value(e, result_, &t));
 
@@ -68,13 +66,8 @@ int ExtractOptions(napi_env e, napi_value options, void* cptr, sass_context_wrap
   if (!is_sync) {
     ctx_w->request.data = ctx_w;
 
-    napi_propertyname nameSuccess;
-    CHECK_NAPI_RESULT(napi_property_name(e, "success", &nameSuccess));
-    napi_propertyname nameError;
-    CHECK_NAPI_RESULT(napi_property_name(e, "error", &nameError));
-
     napi_value success_cb;
-    CHECK_NAPI_RESULT(napi_get_property(e, options, nameSuccess, &success_cb));
+    CHECK_NAPI_RESULT(napi_get_named_property(e, options, "success", &success_cb));
     napi_valuetype cb_type;
     CHECK_NAPI_RESULT(napi_get_type_of_value(e, success_cb, &cb_type));
     if (cb_type == napi_function) {
@@ -82,7 +75,7 @@ int ExtractOptions(napi_env e, napi_value options, void* cptr, sass_context_wrap
     }
 
     napi_value error_cb;
-    CHECK_NAPI_RESULT(napi_get_property(e, options, nameError, &error_cb));
+    CHECK_NAPI_RESULT(napi_get_named_property(e, options, "error", &error_cb));
     CHECK_NAPI_RESULT(napi_get_type_of_value(e, error_cb, &cb_type));
     if (cb_type == napi_function) {
       CHECK_NAPI_RESULT(napi_create_reference(e, error_cb, 1, &ctx_w->error_callback));
@@ -90,19 +83,15 @@ int ExtractOptions(napi_env e, napi_value options, void* cptr, sass_context_wrap
   }
 
   if (!is_file) {
-    napi_propertyname nameFile;
-    CHECK_NAPI_RESULT(napi_property_name(e, "file", &nameFile));
     napi_value propertyFile;
-    CHECK_NAPI_RESULT(napi_get_property(e, options, nameFile, &propertyFile));
+    CHECK_NAPI_RESULT(napi_get_named_property(e, options, "file", &propertyFile));
 
     ctx_w->file = create_string(e, propertyFile);
     sass_option_set_input_path(sass_options, ctx_w->file);
   }
 
-  napi_propertyname nameIndentWidth;
-  CHECK_NAPI_RESULT(napi_property_name(e, "indentWidth", &nameIndentWidth));
   napi_value propertyIndentWidth;
-  CHECK_NAPI_RESULT(napi_get_property(e, options, nameIndentWidth, &propertyIndentWidth));
+  CHECK_NAPI_RESULT(napi_get_named_property(e, options, "indentWidth", &propertyIndentWidth));
   CHECK_NAPI_RESULT(napi_coerce_to_number(e, propertyIndentWidth, &propertyIndentWidth));
   int32_t indent_width_len;
   CHECK_NAPI_RESULT(napi_get_value_int32(e, propertyIndentWidth, &indent_width_len));
@@ -112,10 +101,8 @@ int ExtractOptions(napi_env e, napi_value options, void* cptr, sass_context_wrap
 
   ctx_w->indent = (char*)malloc(indent_width_len + 1);
 
-  napi_propertyname nameIndentType;
-  CHECK_NAPI_RESULT(napi_property_name(e, "indentType", &nameIndentType));
   napi_value propertyIndentType;
-  CHECK_NAPI_RESULT(napi_get_property(e, options, nameIndentType, &propertyIndentType));
+  CHECK_NAPI_RESULT(napi_get_named_property(e, options, "indentType", &propertyIndentType));
   CHECK_NAPI_RESULT(napi_coerce_to_number(e, propertyIndentType, &propertyIndentType));
   int32_t indent_type_len;
   CHECK_NAPI_RESULT(napi_get_value_int32(e, propertyIndentType, &indent_type_len));
@@ -128,27 +115,16 @@ int ExtractOptions(napi_env e, napi_value options, void* cptr, sass_context_wrap
     indent_type_len == 1 ? '\t' : ' '
   ).c_str());
 
-  napi_propertyname nameLinefeed;
-  CHECK_NAPI_RESULT(napi_property_name(e, "linefeed", &nameLinefeed));
-  napi_propertyname nameIncludePaths;
-  CHECK_NAPI_RESULT(napi_property_name(e, "includePaths", &nameIncludePaths));
-  napi_propertyname nameOutFile;
-  CHECK_NAPI_RESULT(napi_property_name(e, "outFile", &nameOutFile));
-  napi_propertyname nameSourceMap;
-  CHECK_NAPI_RESULT(napi_property_name(e, "sourceMap", &nameSourceMap));
-  napi_propertyname nameSourceMapRoot;
-  CHECK_NAPI_RESULT(napi_property_name(e, "sourceMapRoot", &nameSourceMapRoot));
-
   napi_value propertyLinefeed;
-  CHECK_NAPI_RESULT(napi_get_property(e, options, nameLinefeed, &propertyLinefeed));
+  CHECK_NAPI_RESULT(napi_get_named_property(e, options, "linefeed", &propertyLinefeed));
   napi_value propertyIncludePaths;
-  CHECK_NAPI_RESULT(napi_get_property(e, options, nameIncludePaths, &propertyIncludePaths));
+  CHECK_NAPI_RESULT(napi_get_named_property(e, options, "includePaths", &propertyIncludePaths));
   napi_value propertyOutFile;
-  CHECK_NAPI_RESULT(napi_get_property(e, options, nameOutFile, &propertyOutFile));
+  CHECK_NAPI_RESULT(napi_get_named_property(e, options, "outFile", &propertyOutFile));
   napi_value propertySourceMap;
-  CHECK_NAPI_RESULT(napi_get_property(e, options, nameSourceMap, &propertySourceMap));
+  CHECK_NAPI_RESULT(napi_get_named_property(e, options, "sourceMap", &propertySourceMap));
   napi_value propertySourceMapRoot;
-  CHECK_NAPI_RESULT(napi_get_property(e, options, nameSourceMapRoot, &propertySourceMapRoot));
+  CHECK_NAPI_RESULT(napi_get_named_property(e, options, "sourceMapRoot", &propertySourceMapRoot));
 
   ctx_w->linefeed = create_string(e, propertyLinefeed);
   ctx_w->include_path = create_string(e, propertyIncludePaths);
@@ -156,43 +132,24 @@ int ExtractOptions(napi_env e, napi_value options, void* cptr, sass_context_wrap
   ctx_w->source_map = create_string(e, propertySourceMap);
   ctx_w->source_map_root = create_string(e, propertySourceMapRoot);
 
-  napi_propertyname nameStyle;
-  CHECK_NAPI_RESULT(napi_property_name(e, "style", &nameStyle));
-  napi_propertyname nameIdentedSyntax;
-  CHECK_NAPI_RESULT(napi_property_name(e, "indentedSyntax", &nameIdentedSyntax));
-  napi_propertyname nameSourceComments;
-  CHECK_NAPI_RESULT(napi_property_name(e, "sourceComments", &nameSourceComments));
-  napi_propertyname nameOmitSourceMapUrl;
-  CHECK_NAPI_RESULT(napi_property_name(e, "omitSourceMapUrl", &nameOmitSourceMapUrl));
-  napi_propertyname nameSourceMapEmbed;
-  CHECK_NAPI_RESULT(napi_property_name(e, "sourceMapEmbed", &nameSourceMapEmbed));
-  napi_propertyname nameSourceMapContents;
-  CHECK_NAPI_RESULT(napi_property_name(e, "sourceMapContents", &nameSourceMapContents));
-  napi_propertyname namePrecision;
-  CHECK_NAPI_RESULT(napi_property_name(e, "precision", &namePrecision));
-  napi_propertyname nameImporter;
-  CHECK_NAPI_RESULT(napi_property_name(e, "importer", &nameImporter));
-  napi_propertyname nameFunctions;
-  CHECK_NAPI_RESULT(napi_property_name(e, "functions", &nameFunctions));
-
   napi_value propertyStyle;
-  CHECK_NAPI_RESULT(napi_get_property(e, options, nameStyle, &propertyStyle));
+  CHECK_NAPI_RESULT(napi_get_named_property(e, options, "style", &propertyStyle));
   napi_value propertyIdentedSyntax;
-  CHECK_NAPI_RESULT(napi_get_property(e, options, nameIdentedSyntax, &propertyIdentedSyntax));
+  CHECK_NAPI_RESULT(napi_get_named_property(e, options, "indentedSyntax", &propertyIdentedSyntax));
   napi_value propertySourceComments;
-  CHECK_NAPI_RESULT(napi_get_property(e, options, nameSourceComments, &propertySourceComments));
+  CHECK_NAPI_RESULT(napi_get_named_property(e, options, "sourceComments", &propertySourceComments));
   napi_value propertyOmitSourceMapUrl;
-  CHECK_NAPI_RESULT(napi_get_property(e, options, nameOmitSourceMapUrl, &propertyOmitSourceMapUrl));
+  CHECK_NAPI_RESULT(napi_get_named_property(e, options, "omitSourceMapUrl", &propertyOmitSourceMapUrl));
   napi_value propertySourceMapEmbed;
-  CHECK_NAPI_RESULT(napi_get_property(e, options, nameSourceMapEmbed, &propertySourceMapEmbed));
+  CHECK_NAPI_RESULT(napi_get_named_property(e, options, "sourceMapEmbed", &propertySourceMapEmbed));
   napi_value propertySourceMapContents;
-  CHECK_NAPI_RESULT(napi_get_property(e, options, nameSourceMapContents, &propertySourceMapContents));
+  CHECK_NAPI_RESULT(napi_get_named_property(e, options, "sourceMapContents", &propertySourceMapContents));
   napi_value propertyPrecision;
-  CHECK_NAPI_RESULT(napi_get_property(e, options, namePrecision, &propertyPrecision));
+  CHECK_NAPI_RESULT(napi_get_named_property(e, options, "precision", &propertyPrecision));
   napi_value propertyImporter;
-  CHECK_NAPI_RESULT(napi_get_property(e, options, nameImporter, &propertyImporter));
+  CHECK_NAPI_RESULT(napi_get_named_property(e, options, "importer", &propertyImporter));
   napi_value propertyFunctions;
-  CHECK_NAPI_RESULT(napi_get_property(e, options, nameFunctions, &propertyFunctions));
+  CHECK_NAPI_RESULT(napi_get_named_property(e, options, "functions", &propertyFunctions));
 
   int32_t styleVal;
   CHECK_NAPI_RESULT(napi_get_value_int32(e, propertyStyle, &styleVal));
@@ -273,13 +230,9 @@ int ExtractOptions(napi_env e, napi_value options, void* cptr, sass_context_wrap
     for (uint32_t i = 0; i < num_signatures; i++) {
       napi_value signature;
       CHECK_NAPI_RESULT(napi_get_element(e, signatures, i, &signature));
-      // TODO: we should use the signature as the property key directly instead of coercing to string here
-      char* s = create_string(e, signature);
-      napi_propertyname name;
-      CHECK_NAPI_RESULT(napi_property_name(e, s, &name));
-      free(s);
+
       napi_value callback;
-      CHECK_NAPI_RESULT(napi_get_property(e, propertyFunctions, name, &callback));
+      CHECK_NAPI_RESULT(napi_get_property(e, propertyFunctions, signature, &callback));
 
       CustomFunctionBridge *bridge = new CustomFunctionBridge(e, callback, ctx_w->is_sync);
       Sass_Function_Entry fn = sass_make_function(create_string(e, signature), sass_custom_function, bridge);
@@ -313,17 +266,13 @@ void GetStats(napi_env env, sass_context_wrapper* ctx_w, Sass_Context* ctx) {
   CHECK_NAPI_RESULT(napi_get_reference_value(env, ctx_w->result, &result));
   assert(result != nullptr);
 
-  napi_propertyname nameStats;
-  CHECK_NAPI_RESULT(napi_property_name(env, "stats", &nameStats));
   napi_value propertyStats;
-  CHECK_NAPI_RESULT(napi_get_property(env, result, nameStats, &propertyStats));
+  CHECK_NAPI_RESULT(napi_get_named_property(env, result, "stats", &propertyStats));
   napi_valuetype t;
   CHECK_NAPI_RESULT(napi_get_type_of_value(env, propertyStats, &t));
 
   if (t == napi_object) {
-    napi_propertyname nameIncludedFiles;
-    CHECK_NAPI_RESULT(napi_property_name(env, "includedFiles", &nameIncludedFiles));
-    CHECK_NAPI_RESULT(napi_set_property(env, propertyStats, nameIncludedFiles, arr));
+    CHECK_NAPI_RESULT(napi_set_named_property(env, propertyStats, "includedFiles", arr));
   } else {
     CHECK_NAPI_RESULT(napi_throw_type_error(env, "\"result.stats\" element is not an object"));
   }
@@ -331,7 +280,7 @@ void GetStats(napi_env env, sass_context_wrapper* ctx_w, Sass_Context* ctx) {
 
 int GetResult(napi_env env, sass_context_wrapper* ctx_w, Sass_Context* ctx, bool is_sync = false) {
   // TODO: Enable napi_close_handle_scope during a pending exception state.
-  //Napi::HandleScope scope;
+  //Napi::HandleScope scope(env);
 
   int status = sass_context_get_error_status(ctx);
   napi_value result;
@@ -343,40 +292,34 @@ int GetResult(napi_env env, sass_context_wrapper* ctx_w, Sass_Context* ctx, bool
     int css_len = (int)strlen(css);
     const char* map = sass_context_get_source_map_string(ctx);
 
-    napi_propertyname nameCss;
-    CHECK_NAPI_RESULT(napi_property_name(env, "css", &nameCss));
     napi_value cssBuffer;
     CHECK_NAPI_RESULT(napi_create_buffer_copy(env, css, css_len, &cssBuffer));
-    CHECK_NAPI_RESULT(napi_set_property(env, result, nameCss, cssBuffer));
+    CHECK_NAPI_RESULT(napi_set_named_property(env, result, "css", cssBuffer));
 
     GetStats(env, ctx_w, ctx);
 
     if (map) {
       int map_len = (int)strlen(map);
-      napi_propertyname nameMap;
-      CHECK_NAPI_RESULT(napi_property_name(env, "map", &nameMap));
       napi_value mapBuffer;
       CHECK_NAPI_RESULT(napi_create_buffer_copy(env, map, map_len, &mapBuffer));
-      CHECK_NAPI_RESULT(napi_set_property(env, result, nameMap, mapBuffer));
+      CHECK_NAPI_RESULT(napi_set_named_property(env, result, "map", mapBuffer));
     }
   } else if (is_sync) {
     const char* err = sass_context_get_error_json(ctx);
     int err_len = (int)strlen(err);
-    napi_propertyname nameError;
-    CHECK_NAPI_RESULT(napi_property_name(env, "error", &nameError));
     napi_value str;
     CHECK_NAPI_RESULT(napi_create_string_utf8(env, err, err_len, &str));
-    CHECK_NAPI_RESULT(napi_set_property(env, result, nameError, str));
+    CHECK_NAPI_RESULT(napi_set_named_property(env, result, "error", str));
   }
 
   return status;
 }
 
 void MakeCallback(uv_work_t* req) {
-  Napi::HandleScope scope;
-
   sass_context_wrapper* ctx_w = static_cast<sass_context_wrapper*>(req->data);
   struct Sass_Context* ctx;
+
+  Napi::HandleScope scope(ctx_w->env);
 
   if (ctx_w->dctx) {
     ctx = sass_data_context_get_context(ctx_w->dctx);
@@ -421,15 +364,12 @@ void MakeCallback(uv_work_t* req) {
   sass_free_context_wrapper(ctx_w);
 }
 
-NAPI_METHOD(render) {
+void render(napi_env env, napi_callback_info info) {
   napi_value options;
   CHECK_NAPI_RESULT(napi_get_cb_args(env, info, &options, 1));
 
-  napi_propertyname nameData;
-  CHECK_NAPI_RESULT(napi_property_name(env, "data", &nameData));
-
   napi_value propertyData;
-  CHECK_NAPI_RESULT(napi_get_property(env, options, nameData, &propertyData));
+  CHECK_NAPI_RESULT(napi_get_named_property(env, options, "data", &propertyData));
   char* source_string = create_string(env, propertyData);
 
   struct Sass_Data_Context* dctx = sass_make_data_context(source_string);
@@ -442,15 +382,12 @@ NAPI_METHOD(render) {
   }
 }
 
-NAPI_METHOD(render_sync) {
+void render_sync(napi_env env, napi_callback_info info) {
   napi_value options;
   CHECK_NAPI_RESULT(napi_get_cb_args(env, info, &options, 1));
 
-  napi_propertyname nameData;
-  CHECK_NAPI_RESULT(napi_property_name(env, "data", &nameData));
-
   napi_value propertyData;
-  CHECK_NAPI_RESULT(napi_get_property(env, options, nameData, &propertyData));
+  CHECK_NAPI_RESULT(napi_get_named_property(env, options, "data", &propertyData));
   char* source_string = create_string(env, propertyData);
 
   struct Sass_Data_Context* dctx = sass_make_data_context(source_string);
@@ -474,13 +411,11 @@ NAPI_METHOD(render_sync) {
   }
 }
 
-NAPI_METHOD(render_file) {
+void render_file(napi_env env, napi_callback_info info) {
   napi_value options;
   CHECK_NAPI_RESULT(napi_get_cb_args(env, info, &options, 1));
-  napi_propertyname nameFile;
-  CHECK_NAPI_RESULT(napi_property_name(env, "file", &nameFile));
   napi_value propertyFile;
-  CHECK_NAPI_RESULT(napi_get_property(env, options, nameFile, &propertyFile));
+  CHECK_NAPI_RESULT(napi_get_named_property(env, options, "file", &propertyFile));
   char* input_path = create_string(env, propertyFile);
 
   struct Sass_File_Context* fctx = sass_make_file_context(input_path);
@@ -492,13 +427,11 @@ NAPI_METHOD(render_file) {
   }
 }
 
-NAPI_METHOD(render_file_sync) {
+void render_file_sync(napi_env env, napi_callback_info info) {
   napi_value options;
   CHECK_NAPI_RESULT(napi_get_cb_args(env, info, &options, 1));
-  napi_propertyname nameFile;
-  CHECK_NAPI_RESULT(napi_property_name(env, "file", &nameFile));
   napi_value propertyFile;
-  CHECK_NAPI_RESULT(napi_get_property(env, options, nameFile, &propertyFile));
+  CHECK_NAPI_RESULT(napi_get_named_property(env, options, "file", &propertyFile));
   char* input_path = create_string(env, propertyFile);
 
   struct Sass_File_Context* fctx = sass_make_file_context(input_path);
@@ -519,7 +452,7 @@ NAPI_METHOD(render_file_sync) {
   CHECK_NAPI_RESULT(napi_set_return_value(env, info, b));
 }
 
-NAPI_METHOD(libsass_version) {
+void libsass_version(napi_env env, napi_callback_info info) {
   const char* ver = libsass_version();
   int len = (int)strlen(ver);
   napi_value str;
@@ -528,36 +461,25 @@ NAPI_METHOD(libsass_version) {
   CHECK_NAPI_RESULT(napi_set_return_value(env, info, str));
 }
 
-void Init(napi_env env, napi_value target, napi_value module) {
-  napi_propertyname nameRender;
-  CHECK_NAPI_RESULT(napi_property_name(env, "render", &nameRender));
-  napi_propertyname nameRenderSync;
-  CHECK_NAPI_RESULT(napi_property_name(env, "renderSync", &nameRenderSync));
-  napi_propertyname nameRenderFile;
-  CHECK_NAPI_RESULT(napi_property_name(env, "renderFile", &nameRenderFile));
-  napi_propertyname nameRenderFileSync;
-  CHECK_NAPI_RESULT(napi_property_name(env, "renderFileSync", &nameRenderFileSync));
-  napi_propertyname nameLibsassVersion;
-  CHECK_NAPI_RESULT(napi_property_name(env, "libsassVersion", &nameLibsassVersion));
-
+void Init(napi_env env, napi_value target, napi_value module, void* priv) {
   napi_value functionRender;
-  CHECK_NAPI_RESULT(napi_create_function(env, render, nullptr, &functionRender));
+  CHECK_NAPI_RESULT(napi_create_function(env, "render", render, nullptr, &functionRender));
   napi_value functionRenderSync;
-  CHECK_NAPI_RESULT(napi_create_function(env, render_sync, nullptr, &functionRenderSync));
+  CHECK_NAPI_RESULT(napi_create_function(env, "renderSync", render_sync, nullptr, &functionRenderSync));
   napi_value functionRenderFile;
-  CHECK_NAPI_RESULT(napi_create_function(env, render_file, nullptr, &functionRenderFile));
+  CHECK_NAPI_RESULT(napi_create_function(env, "renderFile", render_file, nullptr, &functionRenderFile));
   napi_value functionRenderFileSync;
-  CHECK_NAPI_RESULT(napi_create_function(env, render_file_sync, nullptr, &functionRenderFileSync));
+  CHECK_NAPI_RESULT(napi_create_function(env, "renderFileSync", render_file_sync, nullptr, &functionRenderFileSync));
   napi_value functionLibsassVersion;
-  CHECK_NAPI_RESULT(napi_create_function(env, libsass_version, nullptr, &functionLibsassVersion));
+  CHECK_NAPI_RESULT(napi_create_function(env, "libsassVersion", libsass_version, nullptr, &functionLibsassVersion));
 
-  CHECK_NAPI_RESULT(napi_set_property(env, target, nameRender, functionRender));
-  CHECK_NAPI_RESULT(napi_set_property(env, target, nameRenderSync, functionRenderSync));
-  CHECK_NAPI_RESULT(napi_set_property(env, target, nameRenderFile, functionRenderFile));
-  CHECK_NAPI_RESULT(napi_set_property(env, target, nameRenderFileSync, functionRenderFileSync));
-  CHECK_NAPI_RESULT(napi_set_property(env, target, nameLibsassVersion, functionLibsassVersion));
+  CHECK_NAPI_RESULT(napi_set_named_property(env, target, "render", functionRender));
+  CHECK_NAPI_RESULT(napi_set_named_property(env, target, "renderSync", functionRenderSync));
+  CHECK_NAPI_RESULT(napi_set_named_property(env, target, "renderFile", functionRenderFile));
+  CHECK_NAPI_RESULT(napi_set_named_property(env, target, "renderFileSync", functionRenderFileSync));
+  CHECK_NAPI_RESULT(napi_set_named_property(env, target, "libsassVersion", functionLibsassVersion));
 
   SassTypes::Factory::initExports(env, target);
 }
 
-NODE_MODULE_ABI(binding, Init)
+NAPI_MODULE(binding, Init)

@@ -35,23 +35,23 @@ namespace SassTypes
     return ctor;
   }
 
-  NAPI_METHOD(Map::GetValue) {
+  void Map::GetValue(napi_env env, napi_callback_info info) {
     CommonGetIndexedValue(env, info, sass_map_get_length, sass_map_get_value);
   }
 
-  NAPI_METHOD(Map::SetValue) {
+  void Map::SetValue(napi_env env, napi_callback_info info) {
     CommonSetIndexedValue(env, info, sass_map_set_value);
   }
 
-  NAPI_METHOD(Map::GetKey) {
+  void Map::GetKey(napi_env env, napi_callback_info info) {
     CommonGetIndexedValue(env, info, sass_map_get_length, sass_map_get_key);
   }
 
-  NAPI_METHOD(Map::SetKey) {
+  void Map::SetKey(napi_env env, napi_callback_info info) {
     CommonSetIndexedValue(env, info, sass_map_set_key);
   }
 
-  NAPI_METHOD(Map::GetLength) {
+  void Map::GetLength(napi_env env, napi_callback_info info) {
     napi_value _this;
     CHECK_NAPI_RESULT(napi_get_cb_this(env, info, &_this));
 

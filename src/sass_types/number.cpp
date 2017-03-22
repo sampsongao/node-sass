@@ -46,19 +46,19 @@ namespace SassTypes
     return ctor;
   }
 
-  NAPI_METHOD(Number::GetValue) {
+  void Number::GetValue(napi_env env, napi_callback_info info) {
     CommonGetNumber(env, info, sass_number_get_value);
   }
 
-  NAPI_METHOD(Number::GetUnit) {
+  void Number::GetUnit(napi_env env, napi_callback_info info) {
     CommonGetString(env, info, sass_number_get_unit);
   }
 
-  NAPI_METHOD(Number::SetValue) {
+  void Number::SetValue(napi_env env, napi_callback_info info) {
     CommonSetNumber(env, info, sass_number_set_value);
   }
 
-  NAPI_METHOD(Number::SetUnit) {
+  void Number::SetUnit(napi_env env, napi_callback_info info) {
     CommonSetString(env, info, sass_number_set_unit);
   }
 }
