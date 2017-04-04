@@ -33,7 +33,7 @@ namespace SassTypes
       napi_property_descriptor methods[] = {
         { "getValue", Boolean::GetValue },
       };
-      
+
       CHECK_NAPI_RESULT(napi_define_class(env, "SassBoolean", Boolean::New, nullptr, 1, methods, &ctor));
       CHECK_NAPI_RESULT(napi_create_reference(env, ctor, 1, &Boolean::constructor));
 
@@ -72,7 +72,7 @@ namespace SassTypes
         return;
       }
     } else {
-      int argsLength;
+      size_t argsLength;
       CHECK_NAPI_RESULT(napi_get_cb_args_length(env, info, &argsLength));
 
       if (argsLength != 1) {
@@ -83,7 +83,7 @@ namespace SassTypes
       napi_value argv[1];
       CHECK_NAPI_RESULT(napi_get_cb_args(env, info, argv, 1));
       napi_valuetype t;
-      CHECK_NAPI_RESULT(napi_get_type_of_value(env, argv[0], &t));
+      CHECK_NAPI_RESULT(napi_typeof(env, argv[0], &t));
 
       if (t != napi_boolean) {
         CHECK_NAPI_RESULT(napi_throw_type_error(env, "Expected one boolean argument"));
@@ -103,7 +103,7 @@ namespace SassTypes
     Boolean *out = static_cast<Boolean*>(Factory::unwrap(env, _this));
     if (out) {
       napi_value b;
-      CHECK_NAPI_RESULT(napi_create_boolean(env, out->value, &b));
+      CHECK_NAPI_RESULT(napi_get_boolean(env, out->value, &b));
       CHECK_NAPI_RESULT(napi_set_return_value(env, info, b));
     }
   }

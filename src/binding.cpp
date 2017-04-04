@@ -41,7 +41,7 @@ int ExtractOptions(napi_env e, napi_value options, void* cptr, sass_context_wrap
   napi_value result_;
   CHECK_NAPI_RESULT(napi_get_named_property(e, options, "result", &result_));
   napi_valuetype t;
-  CHECK_NAPI_RESULT(napi_get_type_of_value(e, result_, &t));
+  CHECK_NAPI_RESULT(napi_typeof(e, result_, &t));
 
   if (t != napi_object) {
     CHECK_NAPI_RESULT(napi_throw_type_error(e, "\"result\" element is not an object"));
@@ -69,14 +69,14 @@ int ExtractOptions(napi_env e, napi_value options, void* cptr, sass_context_wrap
     napi_value success_cb;
     CHECK_NAPI_RESULT(napi_get_named_property(e, options, "success", &success_cb));
     napi_valuetype cb_type;
-    CHECK_NAPI_RESULT(napi_get_type_of_value(e, success_cb, &cb_type));
+    CHECK_NAPI_RESULT(napi_typeof(e, success_cb, &cb_type));
     if (cb_type == napi_function) {
       CHECK_NAPI_RESULT(napi_create_reference(e, success_cb, 1, &ctx_w->success_callback));
     }
 
     napi_value error_cb;
     CHECK_NAPI_RESULT(napi_get_named_property(e, options, "error", &error_cb));
-    CHECK_NAPI_RESULT(napi_get_type_of_value(e, error_cb, &cb_type));
+    CHECK_NAPI_RESULT(napi_typeof(e, error_cb, &cb_type));
     if (cb_type == napi_function) {
       CHECK_NAPI_RESULT(napi_create_reference(e, error_cb, 1, &ctx_w->error_callback));
     }
@@ -96,9 +96,6 @@ int ExtractOptions(napi_env e, napi_value options, void* cptr, sass_context_wrap
   int32_t indent_width_len;
   CHECK_NAPI_RESULT(napi_get_value_int32(e, propertyIndentWidth, &indent_width_len));
 
-  // TODO: Fix napi_coerce_to_number to coerce undefined to 0?
-  if (indent_width_len < 0) indent_width_len = 0;
-
   ctx_w->indent = (char*)malloc(indent_width_len + 1);
 
   napi_value propertyIndentType;
@@ -106,9 +103,6 @@ int ExtractOptions(napi_env e, napi_value options, void* cptr, sass_context_wrap
   CHECK_NAPI_RESULT(napi_coerce_to_number(e, propertyIndentType, &propertyIndentType));
   int32_t indent_type_len;
   CHECK_NAPI_RESULT(napi_get_value_int32(e, propertyIndentType, &indent_type_len));
-
-  // TODO: Fix napi_coerce_to_number to coerce undefined to 0?
-  if (indent_type_len < 0) indent_type_len = 0;
 
   strcpy(ctx_w->indent, std::string(
     indent_width_len,
@@ -185,7 +179,7 @@ int ExtractOptions(napi_env e, napi_value options, void* cptr, sass_context_wrap
   sass_option_set_indent(sass_options, ctx_w->indent);
   sass_option_set_linefeed(sass_options, ctx_w->linefeed);
 
-  CHECK_NAPI_RESULT(napi_get_type_of_value(e, propertyImporter, &t));
+  CHECK_NAPI_RESULT(napi_typeof(e, propertyImporter, &t));
 
   if (t == napi_function) {
     CustomImporterBridge *bridge = new CustomImporterBridge(e, propertyImporter, ctx_w->is_sync);
@@ -216,12 +210,12 @@ int ExtractOptions(napi_env e, napi_value options, void* cptr, sass_context_wrap
     }
   }
 
-  CHECK_NAPI_RESULT(napi_get_type_of_value(e, propertyFunctions, &t));
+  CHECK_NAPI_RESULT(napi_typeof(e, propertyFunctions, &t));
 
   if (t == napi_object) {
     // TODO: this should be napi_get_own_propertynames
     napi_value signatures;
-    CHECK_NAPI_RESULT(napi_get_propertynames(e, propertyFunctions, &signatures));
+    CHECK_NAPI_RESULT(napi_get_property_names(e, propertyFunctions, &signatures));
     uint32_t num_signatures;
     CHECK_NAPI_RESULT(napi_get_array_length(e, signatures, &num_signatures));
 
@@ -269,7 +263,7 @@ void GetStats(napi_env env, sass_context_wrapper* ctx_w, Sass_Context* ctx) {
   napi_value propertyStats;
   CHECK_NAPI_RESULT(napi_get_named_property(env, result, "stats", &propertyStats));
   napi_valuetype t;
-  CHECK_NAPI_RESULT(napi_get_type_of_value(env, propertyStats, &t));
+  CHECK_NAPI_RESULT(napi_typeof(env, propertyStats, &t));
 
   if (t == napi_object) {
     CHECK_NAPI_RESULT(napi_set_named_property(env, propertyStats, "includedFiles", arr));
@@ -289,24 +283,24 @@ int GetResult(napi_env env, sass_context_wrapper* ctx_w, Sass_Context* ctx, bool
 
   if (status == 0) {
     const char* css = sass_context_get_output_string(ctx);
-    int css_len = (int)strlen(css);
+    size_t css_len = strlen(css);
     const char* map = sass_context_get_source_map_string(ctx);
 
     napi_value cssBuffer;
-    CHECK_NAPI_RESULT(napi_create_buffer_copy(env, css, css_len, &cssBuffer));
+    CHECK_NAPI_RESULT(napi_create_buffer_copy(env, css_len, css, NULL, &cssBuffer));
     CHECK_NAPI_RESULT(napi_set_named_property(env, result, "css", cssBuffer));
 
     GetStats(env, ctx_w, ctx);
 
     if (map) {
-      int map_len = (int)strlen(map);
+      size_t map_len = strlen(map);
       napi_value mapBuffer;
-      CHECK_NAPI_RESULT(napi_create_buffer_copy(env, map, map_len, &mapBuffer));
+      CHECK_NAPI_RESULT(napi_create_buffer_copy(env, map_len, map, NULL, &mapBuffer));
       CHECK_NAPI_RESULT(napi_set_named_property(env, result, "map", mapBuffer));
     }
   } else if (is_sync) {
     const char* err = sass_context_get_error_json(ctx);
-    int err_len = (int)strlen(err);
+    size_t err_len = strlen(err);
     napi_value str;
     CHECK_NAPI_RESULT(napi_create_string_utf8(env, err, err_len, &str));
     CHECK_NAPI_RESULT(napi_set_named_property(env, result, "error", str));
@@ -406,7 +400,7 @@ void render_sync(napi_env env, napi_callback_info info) {
   CHECK_NAPI_RESULT(napi_is_exception_pending(env, &isExceptionPending));
   if (!isExceptionPending) {
     napi_value boolResult;
-    CHECK_NAPI_RESULT(napi_create_boolean(env, result == 0, &boolResult));
+    CHECK_NAPI_RESULT(napi_get_boolean(env, result == 0, &boolResult));
     CHECK_NAPI_RESULT(napi_set_return_value(env, info, boolResult));
   }
 }
@@ -448,7 +442,7 @@ void render_file_sync(napi_env env, napi_callback_info info) {
   sass_free_context_wrapper(ctx_w);
 
   napi_value b;
-  CHECK_NAPI_RESULT(napi_create_boolean(env, result == 0, &b));
+  CHECK_NAPI_RESULT(napi_get_boolean(env, result == 0, &b));
   CHECK_NAPI_RESULT(napi_set_return_value(env, info, b));
 }
 

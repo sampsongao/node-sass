@@ -11,7 +11,7 @@ namespace SassTypes
 
     if (raw_val.size() >= 1) {
       napi_valuetype t;
-      CHECK_NAPI_RESULT(napi_get_type_of_value(env, raw_val[0], &t));
+      CHECK_NAPI_RESULT(napi_typeof(env, raw_val[0], &t));
 
       if (t != napi_number) {
         return fail("First argument should be a number.", out);
@@ -20,7 +20,7 @@ namespace SassTypes
       CHECK_NAPI_RESULT(napi_get_value_double(env, raw_val[0], &value));
 
       if (raw_val.size() >= 2) {
-        CHECK_NAPI_RESULT(napi_get_type_of_value(env, raw_val[1], &t));
+        CHECK_NAPI_RESULT(napi_typeof(env, raw_val[1], &t));
 
         if (t != napi_string) {
           return fail("Second argument should be a string.", out);

@@ -11,11 +11,11 @@ namespace SassTypes
 
     switch (raw_val.size()) {
     case 1:
-      CHECK_NAPI_RESULT(napi_get_type_of_value(env, raw_val[0], &t));
+      CHECK_NAPI_RESULT(napi_typeof(env, raw_val[0], &t));
       if (t != napi_number) {
         return fail("Only argument should be an integer.", out);
       }
-      
+
       CHECK_NAPI_RESULT(napi_get_value_uint32(env, raw_val[0], &argb));
       a = (double)((argb >> 030) & 0xff) / 0xff;
       r = (double)((argb >> 020) & 0xff);
@@ -24,7 +24,7 @@ namespace SassTypes
       break;
 
     case 4:
-      CHECK_NAPI_RESULT(napi_get_type_of_value(env, raw_val[3], &t));
+      CHECK_NAPI_RESULT(napi_typeof(env, raw_val[3], &t));
       if (t != napi_number) {
         return fail("Constructor arguments should be numbers exclusively.", out);
       }
@@ -32,15 +32,15 @@ namespace SassTypes
       // fall through vvv
 
     case 3:
-      CHECK_NAPI_RESULT(napi_get_type_of_value(env, raw_val[0], &t));
+      CHECK_NAPI_RESULT(napi_typeof(env, raw_val[0], &t));
       if (t != napi_number) {
         return fail("Constructor arguments should be numbers exclusively.", out);
       }
-      CHECK_NAPI_RESULT(napi_get_type_of_value(env, raw_val[1], &t));
+      CHECK_NAPI_RESULT(napi_typeof(env, raw_val[1], &t));
       if (t != napi_number) {
         return fail("Constructor arguments should be numbers exclusively.", out);
       }
-      CHECK_NAPI_RESULT(napi_get_type_of_value(env, raw_val[2], &t));
+      CHECK_NAPI_RESULT(napi_typeof(env, raw_val[2], &t));
       if (t != napi_number) {
         return fail("Constructor arguments should be numbers exclusively.", out);
       }

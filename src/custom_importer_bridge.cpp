@@ -22,7 +22,7 @@ SassImportList CustomImporterBridge::post_process_return_value(napi_env env, nap
       CHECK_NAPI_RESULT(napi_get_element(env, returned_value, i, &value));
 
       napi_valuetype t;
-      CHECK_NAPI_RESULT(napi_get_type_of_value(env, value, &t));
+      CHECK_NAPI_RESULT(napi_typeof(env, value, &t));
 
       if (t != napi_object) {
         auto entry = sass_make_import_entry(0, 0, 0);
@@ -38,7 +38,7 @@ SassImportList CustomImporterBridge::post_process_return_value(napi_env env, nap
 
         char* message = create_string(env, propertyMessage);
         imports[i] = sass_make_import_entry(0, 0, 0);
-        sass_import_set_error(imports[i], message, -1, -1);          
+        sass_import_set_error(imports[i], message, -1, -1);
       } else {
         imports[i] = get_importer_entry(env, value);
       }
@@ -54,7 +54,7 @@ SassImportList CustomImporterBridge::post_process_return_value(napi_env env, nap
     sass_import_set_error(imports[0], message, -1, -1);
   } else {
     napi_valuetype t;
-    CHECK_NAPI_RESULT(napi_get_type_of_value(env, returned_value, &t));
+    CHECK_NAPI_RESULT(napi_typeof(env, returned_value, &t));
 
     if (t == napi_object) {
       imports = sass_make_import_list(1);
@@ -67,7 +67,7 @@ SassImportList CustomImporterBridge::post_process_return_value(napi_env env, nap
 
 Sass_Import* CustomImporterBridge::check_returned_string(napi_env env, napi_value value, const char *msg) const {
   napi_valuetype t;
-  CHECK_NAPI_RESULT(napi_get_type_of_value(env, value, &t));
+  CHECK_NAPI_RESULT(napi_typeof(env, value, &t));
 
   if (t != napi_undefined && t != napi_string) {
     goto err;

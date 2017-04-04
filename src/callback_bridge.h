@@ -56,7 +56,7 @@ template <typename T, typename L>
 napi_ref CallbackBridge<T, L>::wrapper_constructor = nullptr;
 
 template <typename T, typename L>
-void CallbackBridge_Destructor(void* obj, void* hint) {
+void CallbackBridge_Destructor(napi_env env, void* obj, void* hint) {
   CallbackBridge<T, L>* bridge = static_cast<CallbackBridge<T, L>*>(obj);
   delete bridge;
 }

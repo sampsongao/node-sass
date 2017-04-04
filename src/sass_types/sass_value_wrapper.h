@@ -75,7 +75,7 @@ namespace SassTypes
 
   template <class T>
   void SassValueWrapper<T>::CommonSetNumber(napi_env env, napi_callback_info info, void(fnc)(Sass_Value*, double)) {
-    int argLength;
+    size_t argLength;
     CHECK_NAPI_RESULT(napi_get_cb_args_length(env, info, &argLength));
 
     if (argLength != 1) {
@@ -86,7 +86,7 @@ namespace SassTypes
     napi_value argv;
     CHECK_NAPI_RESULT(napi_get_cb_args(env, info, &argv, 1));
     napi_valuetype t;
-    CHECK_NAPI_RESULT(napi_get_type_of_value(env, argv, &t));
+    CHECK_NAPI_RESULT(napi_typeof(env, argv, &t));
 
     if (t != napi_number) {
       CHECK_NAPI_RESULT(napi_throw_type_error(env, "Supplied value should be a number"));
@@ -117,7 +117,7 @@ namespace SassTypes
 
   template <class T>
   void SassValueWrapper<T>::CommonSetString(napi_env env, napi_callback_info info, void(fnc)(Sass_Value*, char*)) {
-    int argLength;
+    size_t argLength;
     CHECK_NAPI_RESULT(napi_get_cb_args_length(env, info, &argLength));
 
     if (argLength != 1) {
@@ -128,7 +128,7 @@ namespace SassTypes
     napi_value argv;
     CHECK_NAPI_RESULT(napi_get_cb_args(env, info, &argv, 1));
     napi_valuetype t;
-    CHECK_NAPI_RESULT(napi_get_type_of_value(env, argv, &t));
+    CHECK_NAPI_RESULT(napi_typeof(env, argv, &t));
 
     if (t != napi_string) {
       CHECK_NAPI_RESULT(napi_throw_type_error(env, "Supplied value should be a string"));
@@ -145,7 +145,7 @@ namespace SassTypes
 
   template <class T>
   void SassValueWrapper<T>::CommonGetIndexedValue(napi_env env, napi_callback_info info, size_t(lenfnc)(const Sass_Value*), Sass_Value*(getfnc)(const Sass_Value*,size_t)) {
-    int argLength;
+    size_t argLength;
     CHECK_NAPI_RESULT(napi_get_cb_args_length(env, info, &argLength));
 
     if (argLength != 1) {
@@ -156,7 +156,7 @@ namespace SassTypes
     napi_value argv;
     CHECK_NAPI_RESULT(napi_get_cb_args(env, info, &argv, 1));
     napi_valuetype t;
-    CHECK_NAPI_RESULT(napi_get_type_of_value(env, argv, &t));
+    CHECK_NAPI_RESULT(napi_typeof(env, argv, &t));
 
     if (t != napi_number) {
       CHECK_NAPI_RESULT(napi_throw_type_error(env, "Supplied index should be an integer"));
@@ -181,7 +181,7 @@ namespace SassTypes
 
   template <class T>
   void SassValueWrapper<T>::CommonSetIndexedValue(napi_env env, napi_callback_info info, void(setfnc)(Sass_Value*, size_t, Sass_Value*)) {
-    int argLength;
+    size_t argLength;
     CHECK_NAPI_RESULT(napi_get_cb_args_length(env, info, &argLength));
 
     if (argLength != 2) {
@@ -192,14 +192,14 @@ namespace SassTypes
     napi_value argv[2];
     CHECK_NAPI_RESULT(napi_get_cb_args(env, info, argv, 2));
     napi_valuetype t;
-    CHECK_NAPI_RESULT(napi_get_type_of_value(env, argv[0], &t));
+    CHECK_NAPI_RESULT(napi_typeof(env, argv[0], &t));
 
     if (t != napi_number) {
       CHECK_NAPI_RESULT(napi_throw_type_error(env, "Supplied index should be an integer"));
       return;
     }
 
-    CHECK_NAPI_RESULT(napi_get_type_of_value(env, argv[1], &t));
+    CHECK_NAPI_RESULT(napi_typeof(env, argv[1], &t));
 
     if (t != napi_object) {
       CHECK_NAPI_RESULT(napi_throw_type_error(env, "Supplied value should be a SassValue object"));
@@ -261,7 +261,7 @@ namespace SassTypes
 
   template <class T>
   void SassValueWrapper<T>::New(napi_env env, napi_callback_info info) {
-    int argsLength;
+    size_t argsLength;
     CHECK_NAPI_RESULT(napi_get_cb_args_length(env, info, &argsLength));
     std::vector<napi_value> localArgs(argsLength);
     napi_value* argv = (napi_value*)malloc(sizeof(napi_value)*argsLength);

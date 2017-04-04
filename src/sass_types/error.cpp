@@ -10,7 +10,7 @@ namespace SassTypes
 
     if (raw_val.size() >= 1) {
       napi_valuetype t;
-      CHECK_NAPI_RESULT(napi_get_type_of_value(env, raw_val[0], &t));
+      CHECK_NAPI_RESULT(napi_typeof(env, raw_val[0], &t));
 
       if (t != napi_string) {
         return fail("First argument should be a string.", out);

@@ -10,18 +10,18 @@
 #define CHECK_NAPI_RESULT_RETURN_NULL(condition) do { if((condition) != napi_ok) { return nullptr; } } while(0)
 
 char* create_string(napi_env e, napi_value v) {
-  napi_valuetype t;  
-  CHECK_NAPI_RESULT_RETURN_NULL(napi_get_type_of_value(e, v, &t));
+  napi_valuetype t;
+  CHECK_NAPI_RESULT_RETURN_NULL(napi_typeof(e, v, &t));
 
   if (t != napi_string) {
       return nullptr;
   }
 
-  int len;
-  CHECK_NAPI_RESULT_RETURN_NULL(napi_get_value_string_utf8_length(e, v, &len));
+  size_t len;
+  CHECK_NAPI_RESULT_RETURN_NULL(napi_get_value_string_utf8(e, v, NULL, 0, &len));
 
   char* str = (char *)malloc(len + 1);
-  int written;
+  size_t written;
   CHECK_NAPI_RESULT_RETURN_NULL(napi_get_value_string_utf8(e, v, str, len + 1, &written));
 
   if (len + 1 != written) {

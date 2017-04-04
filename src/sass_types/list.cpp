@@ -11,7 +11,7 @@ namespace SassTypes
 
     if (raw_val.size() >= 1) {
       napi_valuetype t;
-      CHECK_NAPI_RESULT(napi_get_type_of_value(env, raw_val[0], &t));
+      CHECK_NAPI_RESULT(napi_typeof(env, raw_val[0], &t));
 
       if (t != napi_number) {
         return fail("First argument should be an integer.", out);
@@ -20,7 +20,7 @@ namespace SassTypes
       CHECK_NAPI_RESULT(napi_get_value_uint32(env, raw_val[0], &length));
 
       if (raw_val.size() >= 2) {
-        CHECK_NAPI_RESULT(napi_get_type_of_value(env, raw_val[1], &t));
+        CHECK_NAPI_RESULT(napi_typeof(env, raw_val[1], &t));
 
         if (t != napi_boolean) {
           return fail("Second argument should be a boolean.", out);
@@ -61,12 +61,12 @@ namespace SassTypes
 
     bool v = sass_list_get_separator(unwrap(env, _this)->value) == SASS_COMMA;
     napi_value ret;
-    CHECK_NAPI_RESULT(napi_create_boolean(env, v, &ret));
+    CHECK_NAPI_RESULT(napi_get_boolean(env, v, &ret));
     CHECK_NAPI_RESULT(napi_set_return_value(env, info, ret));
   }
 
   void List::SetSeparator(napi_env env, napi_callback_info info) {
-    int argLength;
+    size_t argLength;
     CHECK_NAPI_RESULT(napi_get_cb_args_length(env, info, &argLength));
 
     if (argLength != 1) {
@@ -77,7 +77,7 @@ namespace SassTypes
     napi_value argv;
     CHECK_NAPI_RESULT(napi_get_cb_args(env, info, &argv, 1));
     napi_valuetype t;
-    CHECK_NAPI_RESULT(napi_get_type_of_value(env, argv, &t));
+    CHECK_NAPI_RESULT(napi_typeof(env, argv, &t));
 
     if (t != napi_boolean) {
       CHECK_NAPI_RESULT(napi_throw_type_error(env, "Supplied value should be a boolean"));

@@ -23,16 +23,21 @@
         'src/sass_types/string.cpp'
       ],
       'msvs_settings': {
+        'VCCLCompilerTool': {
+           'ExceptionHandling': 1
+        },
         'VCLinkerTool': {
            'SetChecksum': 'true'
         }
       },
+      'cflags!': [ '-fno-exceptions' ],
+      'cflags_cc!': [ '-fno-exceptions' ],
       'xcode_settings': {
         'OTHER_CPLUSPLUSFLAGS': [
           '-std=c++11'
         ],
         'OTHER_LDFLAGS': [],
-        'GCC_ENABLE_CPP_EXCEPTIONS': 'NO',
+        'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
         'MACOSX_DEPLOYMENT_TARGET': '10.7'
       },
       'include_dirs': [
