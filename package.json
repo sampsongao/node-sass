@@ -28,10 +28,9 @@
   "gypfile": true,
   "scripts": {
     "coverage": "node scripts/coverage.js",
-    "install": "node scripts/install.js",
-    "postinstall": "node scripts/build.js",
+    "install": "node scripts/build.js --force",
     "lint": "node_modules/.bin/eslint bin/node-sass lib scripts test",
-    "test": "node_modules/.bin/mocha test/{*,**/**}.js",
+    "test": "node --napi-modules node_modules/mocha/bin/_mocha test/api.js",
     "build": "node scripts/build.js --force",
     "prepublish": "not-in-install && node scripts/prepublish.js || in-install"
   },
@@ -72,7 +71,7 @@
     "sass-graph": "^2.1.1",
     "stdout-stream": "^1.4.0",
     "unicode-9.0.0": "^0.7.0",
-    "napi": "github:nodejs/node-api"
+    "node-addon-api": "0.3.0"
   },
   "devDependencies": {
     "coveralls": "^2.11.8",

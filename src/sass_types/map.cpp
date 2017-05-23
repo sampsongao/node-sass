@@ -24,40 +24,40 @@ namespace SassTypes
   napi_value Map::getConstructor(napi_env env, napi_callback cb) {
     napi_value ctor;
     napi_property_descriptor descriptors[] = {
-      { "getLength", GetLength },
-      { "getKey", GetKey },
-      { "setKey", SetKey },
-      { "getValue", GetValue },
-      { "setValue", SetValue },
+      { "getLength", nullptr, GetLength },
+      { "getKey", nullptr, GetKey },
+      { "setKey", nullptr, SetKey },
+      { "getValue", nullptr, GetValue },
+      { "setValue", nullptr, SetValue },
     };
 
     CHECK_NAPI_RESULT(napi_define_class(env, get_constructor_name(), cb, nullptr, 5, descriptors, &ctor));
     return ctor;
   }
 
-  void Map::GetValue(napi_env env, napi_callback_info info) {
-    CommonGetIndexedValue(env, info, sass_map_get_length, sass_map_get_value);
+  napi_value Map::GetValue(napi_env env, napi_callback_info info) {
+    return CommonGetIndexedValue(env, info, sass_map_get_length, sass_map_get_value);
   }
 
-  void Map::SetValue(napi_env env, napi_callback_info info) {
-    CommonSetIndexedValue(env, info, sass_map_set_value);
+  napi_value Map::SetValue(napi_env env, napi_callback_info info) {
+    return CommonSetIndexedValue(env, info, sass_map_set_value);
   }
 
-  void Map::GetKey(napi_env env, napi_callback_info info) {
-    CommonGetIndexedValue(env, info, sass_map_get_length, sass_map_get_key);
+  napi_value Map::GetKey(napi_env env, napi_callback_info info) {
+    return CommonGetIndexedValue(env, info, sass_map_get_length, sass_map_get_key);
   }
 
-  void Map::SetKey(napi_env env, napi_callback_info info) {
-    CommonSetIndexedValue(env, info, sass_map_set_key);
+  napi_value Map::SetKey(napi_env env, napi_callback_info info) {
+    return CommonSetIndexedValue(env, info, sass_map_set_key);
   }
 
-  void Map::GetLength(napi_env env, napi_callback_info info) {
+  napi_value Map::GetLength(napi_env env, napi_callback_info info) {
     napi_value _this;
-    CHECK_NAPI_RESULT(napi_get_cb_this(env, info, &_this));
+    CHECK_NAPI_RESULT(napi_get_cb_info(env, info, nullptr, nullptr, &_this, nullptr));
 
     size_t s = sass_map_get_length(unwrap(env, _this)->value);
     napi_value ret;
     CHECK_NAPI_RESULT(napi_create_number(env, (double)s, &ret));
-    CHECK_NAPI_RESULT(napi_set_return_value(env, info, ret));
+    return ret;
   }
 }

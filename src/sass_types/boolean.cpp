@@ -31,7 +31,7 @@ namespace SassTypes
       CHECK_NAPI_RESULT(napi_get_reference_value(env, Boolean::constructor, &ctor));
     } else {
       napi_property_descriptor methods[] = {
-        { "getValue", Boolean::GetValue },
+        { "getValue", nullptr, Boolean::GetValue },
       };
 
       CHECK_NAPI_RESULT(napi_define_class(env, "SassBoolean", Boolean::New, nullptr, 1, methods, &ctor));
@@ -62,49 +62,50 @@ namespace SassTypes
     return scope.Escape(v);
   }
 
-  void Boolean::New(napi_env env, napi_callback_info info) {
+  napi_value Boolean::New(napi_env env, napi_callback_info info) {
     bool r;
     CHECK_NAPI_RESULT(napi_is_construct_call(env, info, &r));
 
     if (r) {
       if (constructor_locked) {
         CHECK_NAPI_RESULT(napi_throw_type_error(env, "Cannot instantiate SassBoolean"));
-        return;
+        return nullptr;
       }
     } else {
-      size_t argsLength;
-      CHECK_NAPI_RESULT(napi_get_cb_args_length(env, info, &argsLength));
+      size_t argc = 1;
+      napi_value argv[1];
+      CHECK_NAPI_RESULT(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
-      if (argsLength != 1) {
+      if (argc != 1) {
         CHECK_NAPI_RESULT(napi_throw_type_error(env, "Expected one boolean argument"));
-        return;
+        return nullptr;
       }
 
-      napi_value argv[1];
-      CHECK_NAPI_RESULT(napi_get_cb_args(env, info, argv, 1));
       napi_valuetype t;
       CHECK_NAPI_RESULT(napi_typeof(env, argv[0], &t));
 
       if (t != napi_boolean) {
         CHECK_NAPI_RESULT(napi_throw_type_error(env, "Expected one boolean argument"));
-        return;
+        return nullptr;
       }
 
       CHECK_NAPI_RESULT(napi_get_value_bool(env, argv[0], &r));
       napi_value obj = Boolean::get_singleton(r).get_js_object(env);
-      CHECK_NAPI_RESULT(napi_set_return_value(env, info, obj));
+      return obj;
     }
+    return nullptr;
   }
 
-  void Boolean::GetValue(napi_env env, napi_callback_info info) {
+  napi_value Boolean::GetValue(napi_env env, napi_callback_info info) {
     napi_value _this;
-    CHECK_NAPI_RESULT(napi_get_cb_this(env, info, &_this));
+    CHECK_NAPI_RESULT(napi_get_cb_info(env, info, nullptr, nullptr, &_this, nullptr));
 
     Boolean *out = static_cast<Boolean*>(Factory::unwrap(env, _this));
     if (out) {
       napi_value b;
       CHECK_NAPI_RESULT(napi_get_boolean(env, out->value, &b));
-      CHECK_NAPI_RESULT(napi_set_return_value(env, info, b));
+      return b;
     }
+    return nullptr;
   }
 }

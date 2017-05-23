@@ -358,9 +358,10 @@ void MakeCallback(uv_work_t* req) {
   sass_free_context_wrapper(ctx_w);
 }
 
-void render(napi_env env, napi_callback_info info) {
+napi_value render(napi_env env, napi_callback_info info) {
+  size_t argc = 1;
   napi_value options;
-  CHECK_NAPI_RESULT(napi_get_cb_args(env, info, &options, 1));
+  CHECK_NAPI_RESULT(napi_get_cb_info(env, info, &argc, &options, nullptr, nullptr));
 
   napi_value propertyData;
   CHECK_NAPI_RESULT(napi_get_named_property(env, options, "data", &propertyData));
@@ -374,11 +375,14 @@ void render(napi_env env, napi_callback_info info) {
 
     assert(status == 0);
   }
+
+  return nullptr;
 }
 
-void render_sync(napi_env env, napi_callback_info info) {
+napi_value render_sync(napi_env env, napi_callback_info info) {
+  size_t argc = 1;
   napi_value options;
-  CHECK_NAPI_RESULT(napi_get_cb_args(env, info, &options, 1));
+  CHECK_NAPI_RESULT(napi_get_cb_info(env, info, &argc, &options, nullptr, nullptr));
 
   napi_value propertyData;
   CHECK_NAPI_RESULT(napi_get_named_property(env, options, "data", &propertyData));
@@ -401,13 +405,17 @@ void render_sync(napi_env env, napi_callback_info info) {
   if (!isExceptionPending) {
     napi_value boolResult;
     CHECK_NAPI_RESULT(napi_get_boolean(env, result == 0, &boolResult));
-    CHECK_NAPI_RESULT(napi_set_return_value(env, info, boolResult));
+    return boolResult;
   }
+
+  return nullptr;
 }
 
-void render_file(napi_env env, napi_callback_info info) {
+napi_value render_file(napi_env env, napi_callback_info info) {
+  size_t argc = 1;
   napi_value options;
-  CHECK_NAPI_RESULT(napi_get_cb_args(env, info, &options, 1));
+  CHECK_NAPI_RESULT(napi_get_cb_info(env, info, &argc, &options, nullptr, nullptr));
+
   napi_value propertyFile;
   CHECK_NAPI_RESULT(napi_get_named_property(env, options, "file", &propertyFile));
   char* input_path = create_string(env, propertyFile);
@@ -419,11 +427,15 @@ void render_file(napi_env env, napi_callback_info info) {
     int status = uv_queue_work(uv_default_loop(), &ctx_w->request, compile_it, (uv_after_work_cb)MakeCallback);
     assert(status == 0);
   }
+
+  return nullptr;
 }
 
-void render_file_sync(napi_env env, napi_callback_info info) {
+napi_value render_file_sync(napi_env env, napi_callback_info info) {
+  size_t argc = 1;
   napi_value options;
-  CHECK_NAPI_RESULT(napi_get_cb_args(env, info, &options, 1));
+  CHECK_NAPI_RESULT(napi_get_cb_info(env, info, &argc, &options, nullptr, nullptr));
+
   napi_value propertyFile;
   CHECK_NAPI_RESULT(napi_get_named_property(env, options, "file", &propertyFile));
   char* input_path = create_string(env, propertyFile);
@@ -443,16 +455,16 @@ void render_file_sync(napi_env env, napi_callback_info info) {
 
   napi_value b;
   CHECK_NAPI_RESULT(napi_get_boolean(env, result == 0, &b));
-  CHECK_NAPI_RESULT(napi_set_return_value(env, info, b));
+  return b;
 }
 
-void libsass_version(napi_env env, napi_callback_info info) {
+napi_value libsass_version(napi_env env, napi_callback_info info) {
   const char* ver = libsass_version();
   int len = (int)strlen(ver);
   napi_value str;
 
   CHECK_NAPI_RESULT(napi_create_string_utf8(env, ver, len, &str));
-  CHECK_NAPI_RESULT(napi_set_return_value(env, info, str));
+  return str;
 }
 
 void Init(napi_env env, napi_value target, napi_value module, void* priv) {

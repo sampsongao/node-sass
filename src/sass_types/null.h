@@ -18,7 +18,7 @@ namespace SassTypes
       Sass_Value* get_sass_value();
       napi_value get_js_object(napi_env env);
 
-      static void New(napi_env env, napi_callback_info info);
+      static napi_value New(napi_env env, napi_callback_info info);
 
     private:
       Null();

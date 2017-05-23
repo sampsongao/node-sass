@@ -25,19 +25,19 @@ namespace SassTypes
   napi_value String::getConstructor(napi_env env, napi_callback cb) {
     napi_value ctor;
     napi_property_descriptor descriptors[] = {
-      { "getValue", GetValue },
-      { "setValue", SetValue },
+      { "getValue", nullptr, GetValue },
+      { "setValue", nullptr, SetValue },
     };
 
     CHECK_NAPI_RESULT(napi_define_class(env, get_constructor_name(), cb, nullptr, 2, descriptors, &ctor));
     return ctor;
   }
 
-  void String::GetValue(napi_env env, napi_callback_info info) {
-    CommonGetString(env, info, sass_string_get_value);
+  napi_value String::GetValue(napi_env env, napi_callback_info info) {
+    return CommonGetString(env, info, sass_string_get_value);
   }
 
-  void String::SetValue(napi_env env, napi_callback_info info) {
-    CommonSetString(env, info, sass_string_set_value);
+  napi_value String::SetValue(napi_env env, napi_callback_info info) {
+    return CommonSetString(env, info, sass_string_set_value);
   }
 }

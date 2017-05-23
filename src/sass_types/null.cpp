@@ -54,19 +54,19 @@ namespace SassTypes
     return v;
   }
 
-  void Null::New(napi_env env, napi_callback_info info) {
+  napi_value Null::New(napi_env env, napi_callback_info info) {
     bool r;
     CHECK_NAPI_RESULT(napi_is_construct_call(env, info, &r));
 
     if (r) {
       if (constructor_locked) {
         CHECK_NAPI_RESULT(napi_throw_type_error(env, "Cannot instantiate SassNull"));
-        return;
       }
     }
     else {
       napi_value obj = Null::get_singleton().get_js_object(env);
-      CHECK_NAPI_RESULT(napi_set_return_value(env, info, obj));
+      return obj;
     }
+    return nullptr;
   }
 }

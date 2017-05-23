@@ -1,4 +1,4 @@
-﻿#include <stdlib.h>
+#include <stdlib.h>
 #include <string.h>
 #include "create_string.h"
 
@@ -24,7 +24,7 @@ char* create_string(napi_env e, napi_value v) {
   size_t written;
   CHECK_NAPI_RESULT_RETURN_NULL(napi_get_value_string_utf8(e, v, str, len + 1, &written));
 
-  if (len + 1 != written) {
+  if (len != written) {
     free(str);
     return nullptr;
   }

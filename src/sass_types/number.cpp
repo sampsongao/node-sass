@@ -36,29 +36,29 @@ namespace SassTypes
   napi_value Number::getConstructor(napi_env env, napi_callback cb) {
     napi_value ctor;
     napi_property_descriptor descriptors [] = {
-        { "getValue", GetValue },
-        { "getUnit", GetUnit },
-        { "setValue", SetValue },
-        { "setUnit", SetUnit },
+        { "getValue", nullptr, GetValue },
+        { "getUnit", nullptr, GetUnit },
+        { "setValue", nullptr, SetValue },
+        { "setUnit", nullptr, SetUnit },
     };
 
     CHECK_NAPI_RESULT(napi_define_class(env, get_constructor_name(), cb, nullptr, 4, descriptors, &ctor));
     return ctor;
   }
 
-  void Number::GetValue(napi_env env, napi_callback_info info) {
-    CommonGetNumber(env, info, sass_number_get_value);
+  napi_value Number::GetValue(napi_env env, napi_callback_info info) {
+    return CommonGetNumber(env, info, sass_number_get_value);
   }
 
-  void Number::GetUnit(napi_env env, napi_callback_info info) {
-    CommonGetString(env, info, sass_number_get_unit);
+  napi_value Number::GetUnit(napi_env env, napi_callback_info info) {
+    return CommonGetString(env, info, sass_number_get_unit);
   }
 
-  void Number::SetValue(napi_env env, napi_callback_info info) {
-    CommonSetNumber(env, info, sass_number_set_value);
+  napi_value Number::SetValue(napi_env env, napi_callback_info info) {
+    return CommonSetNumber(env, info, sass_number_set_value);
   }
 
-  void Number::SetUnit(napi_env env, napi_callback_info info) {
-    CommonSetString(env, info, sass_number_set_unit);
+  napi_value Number::SetUnit(napi_env env, napi_callback_info info) {
+    return CommonSetString(env, info, sass_number_set_unit);
   }
 }

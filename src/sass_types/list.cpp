@@ -36,70 +36,68 @@ namespace SassTypes
   napi_value List::getConstructor(napi_env env, napi_callback cb) {
     napi_value ctor;
     napi_property_descriptor descriptors[] = {
-      { "getLength", GetLength },
-      { "getSeparator", GetSeparator },
-      { "setSeparator", SetSeparator },
-      { "getValue", GetValue },
-      { "setValue", SetValue },
+      { "getLength", nullptr, GetLength },
+      { "getSeparator", nullptr, GetSeparator },
+      { "setSeparator", nullptr, SetSeparator },
+      { "getValue", nullptr, GetValue },
+      { "setValue", nullptr, SetValue },
     };
 
     CHECK_NAPI_RESULT(napi_define_class(env, get_constructor_name(), cb, nullptr, 5, descriptors, &ctor));
     return ctor;
   }
 
-  void List::GetValue(napi_env env, napi_callback_info info) {
-    CommonGetIndexedValue(env, info, sass_list_get_length, sass_list_get_value);
+  napi_value List::GetValue(napi_env env, napi_callback_info info) {
+    return CommonGetIndexedValue(env, info, sass_list_get_length, sass_list_get_value);
   }
 
-  void List::SetValue(napi_env env, napi_callback_info info) {
-    CommonSetIndexedValue(env, info, sass_list_set_value);
+  napi_value List::SetValue(napi_env env, napi_callback_info info) {
+    return CommonSetIndexedValue(env, info, sass_list_set_value);
   }
 
-  void List::GetSeparator(napi_env env, napi_callback_info info) {
+  napi_value List::GetSeparator(napi_env env, napi_callback_info info) {
     napi_value _this;
-    CHECK_NAPI_RESULT(napi_get_cb_this(env, info, &_this));
+    CHECK_NAPI_RESULT(napi_get_cb_info(env, info, nullptr, nullptr, &_this, nullptr));
 
     bool v = sass_list_get_separator(unwrap(env, _this)->value) == SASS_COMMA;
     napi_value ret;
     CHECK_NAPI_RESULT(napi_get_boolean(env, v, &ret));
-    CHECK_NAPI_RESULT(napi_set_return_value(env, info, ret));
+    return ret;
   }
 
-  void List::SetSeparator(napi_env env, napi_callback_info info) {
-    size_t argLength;
-    CHECK_NAPI_RESULT(napi_get_cb_args_length(env, info, &argLength));
+  napi_value List::SetSeparator(napi_env env, napi_callback_info info) {
+    size_t argc = 1;
+    napi_value arg;
+    napi_value _this;
+    CHECK_NAPI_RESULT(napi_get_cb_info(env, info, &argc, &arg, &_this, nullptr));
 
-    if (argLength != 1) {
+    if (argc != 1) {
       CHECK_NAPI_RESULT(napi_throw_type_error(env, "Expected just one argument"));
-      return;
+      return nullptr;
     }
 
-    napi_value argv;
-    CHECK_NAPI_RESULT(napi_get_cb_args(env, info, &argv, 1));
     napi_valuetype t;
-    CHECK_NAPI_RESULT(napi_typeof(env, argv, &t));
+    CHECK_NAPI_RESULT(napi_typeof(env, arg, &t));
 
     if (t != napi_boolean) {
       CHECK_NAPI_RESULT(napi_throw_type_error(env, "Supplied value should be a boolean"));
-      return;
+      return nullptr;
     }
 
-    napi_value _this;
-    CHECK_NAPI_RESULT(napi_get_cb_this(env, info, &_this));
-
     bool b;
-    CHECK_NAPI_RESULT(napi_get_value_bool(env, argv, &b));
+    CHECK_NAPI_RESULT(napi_get_value_bool(env, arg, &b));
 
     sass_list_set_separator(unwrap(env, _this)->value, b ? SASS_COMMA : SASS_SPACE);
+    return nullptr;
   }
 
-  void List::GetLength(napi_env env, napi_callback_info info) {
+  napi_value List::GetLength(napi_env env, napi_callback_info info) {
     napi_value _this;
-    CHECK_NAPI_RESULT(napi_get_cb_this(env, info, &_this));
+    CHECK_NAPI_RESULT(napi_get_cb_info(env, info, nullptr, nullptr, &_this, nullptr));
 
     size_t s = sass_list_get_length(unwrap(env, _this)->value);
     napi_value ret;
     CHECK_NAPI_RESULT(napi_create_number(env, (double)s, &ret));
-    CHECK_NAPI_RESULT(napi_set_return_value(env, info, ret));
+    return ret;
   }
 }

@@ -24,8 +24,8 @@ class CallbackBridge {
     // This is the V8 constructor for such objects.
     static napi_ref get_wrapper_constructor(napi_env env);
     static void async_gone(uv_handle_t *handle);
-    static void New(napi_env env, napi_callback_info info);
-    static void ReturnCallback(napi_env env, napi_callback_info info);
+    static napi_value New(napi_env env, napi_callback_info info);
+    static napi_value ReturnCallback(napi_env env, napi_callback_info info);
     static napi_ref wrapper_constructor;
     napi_ref wrapper;
 
@@ -74,10 +74,10 @@ napi_value CallbackBridge<T, L>::NewInstance(napi_env env) {
 }
 
 template <typename T, typename L>
-void CallbackBridge<T, L>::New(napi_env env, napi_callback_info info) {
+napi_value CallbackBridge<T, L>::New(napi_env env, napi_callback_info info) {
   napi_value _this;
-  CHECK_NAPI_RESULT(napi_get_cb_this(env, info, &_this));
-  CHECK_NAPI_RESULT(napi_set_return_value(env, info, _this));
+  CHECK_NAPI_RESULT(napi_get_cb_info(env, info, nullptr, nullptr, &_this, nullptr));
+  return _this;
 }
 
 template <typename T, typename L>
@@ -224,15 +224,15 @@ void CallbackBridge<T, L>::dispatched_async_uv_callback(uv_async_t *req) {
 }
 
 template <typename T, typename L>
-void CallbackBridge<T, L>::ReturnCallback(napi_env env, napi_callback_info info) {
+napi_value CallbackBridge<T, L>::ReturnCallback(napi_env env, napi_callback_info info) {
+  size_t argc = 1;
+  napi_value arg;
   napi_value _this;
-  CHECK_NAPI_RESULT(napi_get_cb_this(env, info, &_this));
+  CHECK_NAPI_RESULT(napi_get_cb_info(env, info, &argc, &arg, &_this, nullptr));
+
   void* unwrapped;
   CHECK_NAPI_RESULT(napi_unwrap(env, _this, &unwrapped));
   CallbackBridge* bridge = static_cast<CallbackBridge*>(unwrapped);
-
-  napi_value args[1];
-  CHECK_NAPI_RESULT(napi_get_cb_args(env, info, args, 1));
 
   /*
    * Callback function invoked by the user code.
@@ -242,7 +242,7 @@ void CallbackBridge<T, L>::ReturnCallback(napi_env env, napi_callback_info info)
    * Implicit Local<> handle scope created by NAN_METHOD(.)
    */
 
-  bridge->return_value = bridge->post_process_return_value(env, args[0]);
+  bridge->return_value = bridge->post_process_return_value(env, arg);
 
   {
     uv_mutex_lock(&bridge->cv_mutex);
@@ -259,6 +259,8 @@ void CallbackBridge<T, L>::ReturnCallback(napi_env env, napi_callback_info info)
       // TODO: Call node::FatalException or add napi_fatal_exception ?
       assert(false);
   }
+
+  return nullptr;
 }
 
 template <typename T, typename L>
@@ -266,7 +268,7 @@ napi_ref CallbackBridge<T, L>::get_wrapper_constructor(napi_env env) {
   // TODO: cache wrapper_constructor
 
   napi_property_descriptor methods[] = {
-    { "success", CallbackBridge::ReturnCallback },
+    { "success", nullptr, CallbackBridge::ReturnCallback },
   };
 
   napi_value ctor;

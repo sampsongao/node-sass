@@ -40,8 +40,11 @@
         'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
         'MACOSX_DEPLOYMENT_TARGET': '10.7'
       },
+      "dependencies": [
+        "<!(node -p \"require('node-addon-api').gyp\")"
+      ],
       'include_dirs': [
-        "<!(node -p \"require('node-api').include\")"
+        "<!@(node -p \"require('node-addon-api').include\")"
       ],
       'conditions': [
         ['libsass_ext == "" or libsass_ext == "no"', {

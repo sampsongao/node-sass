@@ -12,10 +12,10 @@ namespace SassTypes
       static Sass_Value* construct(napi_env, const std::vector<napi_value>, Sass_Value **);
       static napi_value getConstructor(napi_env, napi_callback);
 
-      static void GetValue(napi_env env, napi_callback_info info);
-      static void GetUnit(napi_env env, napi_callback_info info);
-      static void SetValue(napi_env env, napi_callback_info info);
-      static void SetUnit(napi_env env, napi_callback_info info);
+      static napi_value GetValue(napi_env env, napi_callback_info info);
+      static napi_value GetUnit(napi_env env, napi_callback_info info);
+      static napi_value SetValue(napi_env env, napi_callback_info info);
+      static napi_value SetUnit(napi_env env, napi_callback_info info);
   };
 }
 
