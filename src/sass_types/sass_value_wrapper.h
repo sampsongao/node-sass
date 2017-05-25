@@ -5,6 +5,7 @@
 #include <vector>
 #include "value.h"
 #include "factory.h"
+#include "../create_string.h"
 #include <napi.h>
 
 namespace SassTypes

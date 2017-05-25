@@ -30,7 +30,7 @@
     "coverage": "node scripts/coverage.js",
     "install": "node scripts/build.js --force",
     "lint": "node_modules/.bin/eslint bin/node-sass lib scripts test",
-    "test": "node --napi-modules node_modules/mocha/bin/_mocha test/api.js",
+    "test": "node_modules/.bin/mocha test/api.js",
     "build": "node scripts/build.js --force",
     "prepublish": "not-in-install && node scripts/prepublish.js || in-install"
   },

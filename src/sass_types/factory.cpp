@@ -8,7 +8,7 @@
 #include "map.h"
 #include "null.h"
 #include "error.h"
-#include "..\common.h"
+#include "../common.h"
 
 namespace SassTypes
 {

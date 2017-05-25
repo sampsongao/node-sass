@@ -2,7 +2,7 @@
 #define SASS_TYPES_VALUE_H
 
 #include <sass/values.h>
-#include "..\common.h"
+#include "../common.h"
 #include <napi.h>
 
 namespace SassTypes

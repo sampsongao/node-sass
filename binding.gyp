@@ -36,6 +36,7 @@
         'OTHER_CPLUSPLUSFLAGS': [
           '-std=c++11'
         ],
+        'CLANG_CXX_LIBRARY': 'libc++',
         'OTHER_LDFLAGS': [],
         'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
         'MACOSX_DEPLOYMENT_TARGET': '10.7'
