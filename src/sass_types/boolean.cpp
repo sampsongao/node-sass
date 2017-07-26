@@ -68,7 +68,7 @@ namespace SassTypes
 
     if (r) {
       if (constructor_locked) {
-        CHECK_NAPI_RESULT(napi_throw_type_error(env, "Cannot instantiate SassBoolean"));
+        CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Cannot instantiate SassBoolean"));
         return nullptr;
       }
     } else {
@@ -77,7 +77,7 @@ namespace SassTypes
       CHECK_NAPI_RESULT(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
       if (argc != 1) {
-        CHECK_NAPI_RESULT(napi_throw_type_error(env, "Expected one boolean argument"));
+        CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Expected one boolean argument"));
         return nullptr;
       }
 
@@ -85,7 +85,7 @@ namespace SassTypes
       CHECK_NAPI_RESULT(napi_typeof(env, argv[0], &t));
 
       if (t != napi_boolean) {
-        CHECK_NAPI_RESULT(napi_throw_type_error(env, "Expected one boolean argument"));
+        CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Expected one boolean argument"));
         return nullptr;
       }
 

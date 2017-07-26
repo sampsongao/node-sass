@@ -44,7 +44,7 @@ int ExtractOptions(napi_env e, napi_value options, void* cptr, sass_context_wrap
   CHECK_NAPI_RESULT(napi_typeof(e, result_, &t));
 
   if (t != napi_object) {
-    CHECK_NAPI_RESULT(napi_throw_type_error(e, "\"result\" element is not an object"));
+    CHECK_NAPI_RESULT(napi_throw_type_error(e, nullptr, "\"result\" element is not an object"));
     return -1;
   }
 
@@ -268,7 +268,7 @@ void GetStats(napi_env env, sass_context_wrapper* ctx_w, Sass_Context* ctx) {
   if (t == napi_object) {
     CHECK_NAPI_RESULT(napi_set_named_property(env, propertyStats, "includedFiles", arr));
   } else {
-    CHECK_NAPI_RESULT(napi_throw_type_error(env, "\"result.stats\" element is not an object"));
+    CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "\"result.stats\" element is not an object"));
   }
 }
 

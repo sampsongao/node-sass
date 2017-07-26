@@ -60,7 +60,7 @@ namespace SassTypes
 
     if (r) {
       if (constructor_locked) {
-        CHECK_NAPI_RESULT(napi_throw_type_error(env, "Cannot instantiate SassNull"));
+        CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Cannot instantiate SassNull"));
       }
     }
     else {

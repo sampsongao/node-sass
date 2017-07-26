@@ -72,7 +72,7 @@ namespace SassTypes
     CHECK_NAPI_RESULT(napi_get_cb_info(env, info, &argc, &arg, &_this, nullptr));
 
     if (argc != 1) {
-      CHECK_NAPI_RESULT(napi_throw_type_error(env, "Expected just one argument"));
+      CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Expected just one argument"));
       return nullptr;
     }
 
@@ -80,7 +80,7 @@ namespace SassTypes
     CHECK_NAPI_RESULT(napi_typeof(env, arg, &t));
 
     if (t != napi_boolean) {
-      CHECK_NAPI_RESULT(napi_throw_type_error(env, "Supplied value should be a boolean"));
+      CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Supplied value should be a boolean"));
       return nullptr;
     }
 

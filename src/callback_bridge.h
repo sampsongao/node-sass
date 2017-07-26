@@ -134,7 +134,7 @@ T CallbackBridge<T, L>::operator()(std::vector<void*> argv) {
     CHECK_NAPI_RESULT(napi_is_exception_pending(this->e, &isPending));
 
     if (isPending) {
-      CHECK_NAPI_RESULT(napi_throw_error(this->e, "Error processing arguments"));
+      CHECK_NAPI_RESULT(napi_throw_error(this->e, nullptr, "Error processing arguments"));
       // This should be a FatalException but we still have to return something, this value might be uninitialized
       return this->return_value;
     }
@@ -199,7 +199,7 @@ void CallbackBridge<T, L>::dispatched_async_uv_callback(uv_async_t *req) {
 
   CHECK_NAPI_RESULT(napi_is_exception_pending(bridge->e, &isPending));
   if (isPending) {
-      CHECK_NAPI_RESULT(napi_throw_error(bridge->e, "Error processing arguments"));
+      CHECK_NAPI_RESULT(napi_throw_error(bridge->e, nullptr, "Error processing arguments"));
       // This should be a FatalException
       return;
   }
@@ -217,7 +217,7 @@ void CallbackBridge<T, L>::dispatched_async_uv_callback(uv_async_t *req) {
   CHECK_NAPI_RESULT(napi_make_callback(bridge->e, _this, cb, argv_v8.size(), &argv_v8[0], &result));
   CHECK_NAPI_RESULT(napi_is_exception_pending(bridge->e, &isPending));
   if (isPending) {
-      CHECK_NAPI_RESULT(napi_throw_error(bridge->e, "Error thrown in callback"));
+      CHECK_NAPI_RESULT(napi_throw_error(bridge->e, nullptr, "Error thrown in callback"));
       // This should be a FatalException
       return;
   }
