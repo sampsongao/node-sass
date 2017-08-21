@@ -55,9 +55,10 @@ namespace SassTypes
   }
 
   napi_value Null::New(napi_env env, napi_callback_info info) {
-    bool r;
-    CHECK_NAPI_RESULT(napi_is_construct_call(env, info, &r));
+    napi_value new_target;
+    CHECK_NAPI_RESULT(napi_is_construct_call(env, info, &new_target));
 
+    bool r = (new_target != nullptr);
     if (r) {
       if (constructor_locked) {
         CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Cannot instantiate SassNull"));
