@@ -226,7 +226,7 @@ namespace SassTypes
       napi_value ctor = T::get_constructor(env);
       CHECK_NAPI_RESULT(napi_new_instance(env, ctor, 0, nullptr, &wrapper));
       void* wrapped;
-      CHECK_NAPI_RESULT(napi_unwrap(env, wrapper, &wrapped));
+      CHECK_NAPI_RESULT(napi_remove_wrap(env, wrapper, &wrapped));
       delete static_cast<T*>(wrapped);
       CHECK_NAPI_RESULT(napi_wrap(env, wrapper, this, nullptr, nullptr, nullptr));
       CHECK_NAPI_RESULT(napi_create_reference(env, wrapper, 1, &this->js_object));
