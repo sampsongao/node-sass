@@ -97,7 +97,7 @@ namespace SassTypes
 
     size_t s = sass_list_get_length(unwrap(env, _this)->value);
     napi_value ret;
-    CHECK_NAPI_RESULT(napi_create_number(env, (double)s, &ret));
+    CHECK_NAPI_RESULT(napi_create_double(env, (double)s, &ret));
     return ret;
   }
 }
