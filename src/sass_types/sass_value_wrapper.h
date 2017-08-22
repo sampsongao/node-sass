@@ -70,7 +70,7 @@ namespace SassTypes
     double d = fnc(unwrap(env, _this)->value);
 
     napi_value ret;
-    CHECK_NAPI_RESULT(napi_create_number(env, d, &ret));
+    CHECK_NAPI_RESULT(napi_create_double(env, d, &ret));
     return ret;
   }
 
