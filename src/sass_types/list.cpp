@@ -43,7 +43,7 @@ namespace SassTypes
       { "setValue", nullptr, SetValue },
     };
 
-    CHECK_NAPI_RESULT(napi_define_class(env, get_constructor_name(), cb, nullptr, 5, descriptors, &ctor));
+    CHECK_NAPI_RESULT(napi_define_class(env, get_constructor_name(), -1, cb, nullptr, 5, descriptors, &ctor));
     return ctor;
   }
 

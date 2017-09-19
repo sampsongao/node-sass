@@ -149,7 +149,7 @@ T CallbackBridge<T, L>::operator()(std::vector<void*> argv) {
 
     napi_value result;
     // TODO: Is receiver set correctly ?
-    CHECK_NAPI_RESULT(napi_make_callback(this->e, _this, cb, argv_v8.size(), &argv_v8[0], &result));
+    CHECK_NAPI_RESULT(napi_make_callback(this->e, nullptr, _this, cb, argv_v8.size(), &argv_v8[0], &result));
 
     return this->post_process_return_value(this->e, result);
   } else {
@@ -214,7 +214,7 @@ void CallbackBridge<T, L>::dispatched_async_uv_callback(uv_async_t *req) {
 
   napi_value result;
   // TODO: Is receiver set correctly ?
-  CHECK_NAPI_RESULT(napi_make_callback(bridge->e, _this, cb, argv_v8.size(), &argv_v8[0], &result));
+  CHECK_NAPI_RESULT(napi_make_callback(bridge->e, nullptr, _this, cb, argv_v8.size(), &argv_v8[0], &result));
   CHECK_NAPI_RESULT(napi_is_exception_pending(bridge->e, &isPending));
   if (isPending) {
       CHECK_NAPI_RESULT(napi_throw_error(bridge->e, nullptr, "Error thrown in callback"));
@@ -272,7 +272,7 @@ napi_ref CallbackBridge<T, L>::get_wrapper_constructor(napi_env env) {
   };
 
   napi_value ctor;
-  CHECK_NAPI_RESULT(napi_define_class(env, "CallbackBridge", CallbackBridge::New, nullptr, 1, methods, &ctor));
+  CHECK_NAPI_RESULT(napi_define_class(env, "CallbackBridge", -1, CallbackBridge::New, nullptr, 1, methods, &ctor));
   CHECK_NAPI_RESULT(napi_create_reference(env, ctor, 1, &wrapper_constructor));
 
   return wrapper_constructor;

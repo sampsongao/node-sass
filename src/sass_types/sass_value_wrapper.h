@@ -261,8 +261,9 @@ namespace SassTypes
     std::vector<napi_value> argv(argc);
     CHECK_NAPI_RESULT(napi_get_cb_info(env, info, &argc, argv.data(), nullptr, nullptr));
 
-    bool r;
-    CHECK_NAPI_RESULT(napi_is_construct_call(env, info, &r));
+    napi_value t;
+    CHECK_NAPI_RESULT(napi_get_new_target(env, info, &t));
+    bool r = (t != nullptr);
 
     if (r) {
       Sass_Value* value;
