@@ -469,15 +469,15 @@ napi_value libsass_version(napi_env env, napi_callback_info info) {
 
 napi_value Init(napi_env env, napi_value target) {
   napi_value functionRender;
-  CHECK_NAPI_RESULT(napi_create_function(env, "render", -1, render, nullptr, &functionRender));
+  CHECK_NAPI_RESULT(napi_create_function(env, "render", NAPI_AUTO_LENGTH, render, nullptr, &functionRender));
   napi_value functionRenderSync;
-  CHECK_NAPI_RESULT(napi_create_function(env, "renderSync", -1, render_sync, nullptr, &functionRenderSync));
+  CHECK_NAPI_RESULT(napi_create_function(env, "renderSync", NAPI_AUTO_LENGTH, render_sync, nullptr, &functionRenderSync));
   napi_value functionRenderFile;
-  CHECK_NAPI_RESULT(napi_create_function(env, "renderFile", -1, render_file, nullptr, &functionRenderFile));
+  CHECK_NAPI_RESULT(napi_create_function(env, "renderFile", NAPI_AUTO_LENGTH, render_file, nullptr, &functionRenderFile));
   napi_value functionRenderFileSync;
-  CHECK_NAPI_RESULT(napi_create_function(env, "renderFileSync", -1, render_file_sync, nullptr, &functionRenderFileSync));
+  CHECK_NAPI_RESULT(napi_create_function(env, "renderFileSync", NAPI_AUTO_LENGTH, render_file_sync, nullptr, &functionRenderFileSync));
   napi_value functionLibsassVersion;
-  CHECK_NAPI_RESULT(napi_create_function(env, "libsassVersion", -1, libsass_version, nullptr, &functionLibsassVersion));
+  CHECK_NAPI_RESULT(napi_create_function(env, "libsassVersion", NAPI_AUTO_LENGTH, libsass_version, nullptr, &functionLibsassVersion));
 
   CHECK_NAPI_RESULT(napi_set_named_property(env, target, "render", functionRender));
   CHECK_NAPI_RESULT(napi_set_named_property(env, target, "renderSync", functionRenderSync));

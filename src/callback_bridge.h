@@ -272,7 +272,7 @@ napi_ref CallbackBridge<T, L>::get_wrapper_constructor(napi_env env) {
   };
 
   napi_value ctor;
-  CHECK_NAPI_RESULT(napi_define_class(env, "CallbackBridge", -1, CallbackBridge::New, nullptr, 1, methods, &ctor));
+  CHECK_NAPI_RESULT(napi_define_class(env, "CallbackBridge", NAPI_AUTO_LENGTH, CallbackBridge::New, nullptr, 1, methods, &ctor));
   CHECK_NAPI_RESULT(napi_create_reference(env, ctor, 1, &wrapper_constructor));
 
   return wrapper_constructor;

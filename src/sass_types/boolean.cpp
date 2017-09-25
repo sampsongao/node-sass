@@ -34,7 +34,7 @@ namespace SassTypes
         { "getValue", nullptr, Boolean::GetValue },
       };
 
-      CHECK_NAPI_RESULT(napi_define_class(env, "SassBoolean", -1, Boolean::New, nullptr, 1, methods, &ctor));
+      CHECK_NAPI_RESULT(napi_define_class(env, "SassBoolean", NAPI_AUTO_LENGTH, Boolean::New, nullptr, 1, methods, &ctor));
       CHECK_NAPI_RESULT(napi_create_reference(env, ctor, 1, &Boolean::constructor));
 
       Boolean& falseSingleton = get_singleton(false);
