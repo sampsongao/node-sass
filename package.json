@@ -65,7 +65,7 @@
     "meow": "^3.7.0",
     "mkdirp": "^0.5.1",
     "nan": "^2.3.2",
-    "node-addon-api": "^0.6.2",
+    "node-addon-api": "^1.0.0",
     "node-gyp": "^3.3.1",
     "npmlog": "^4.0.0",
     "request": "^2.61.0",
